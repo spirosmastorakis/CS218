@@ -77,7 +77,6 @@ PktHeader::Serialize (Buffer::Iterator start) const
 	i.WriteHtonU32 (m_foreignDestinationId.Get ());
         for (int k = 0; k< int(m_bestBorderNodeId.size ()); k++){
 		i.WriteHtonU32 (m_bestBorderNodeId[k].Get ());
-		i.Next ();
     	}
 	i.WriteHtonU32 (m_borderNodeNumber);
 }
@@ -112,9 +111,12 @@ PktHeader::Deserialize (Buffer::Iterator start)
 	m_foreignDestinationId.Set (i.ReadNtohU32 ());
 	m_bestBorderNodeId.clear();
 	int k = 0;
-	while (!((i.Next ()).IsEnd ())) {
+	Buffer::Iterator temp = i;
+	temp.Next (4);
+	while (!(temp.IsEnd ())) {
 		m_bestBorderNodeId[k].Set (i.ReadNtohU32 ());
-		i.Next ();
+		k++;
+		temp.Next (4);
 	}
 	
     m_borderNodeNumber = m_bestBorderNodeId.size();
