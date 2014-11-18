@@ -27,6 +27,7 @@ def build(bld):
         'model/kmean_code/kmlsample.cpp',
         'model/kmean_code/KMrand.cpp',
         'model/kmean_code/KMterm.cpp',
+	'model/qhs.cc'
         ]
 
     module_test = bld.create_ns3_module_test_library('social-network')
@@ -54,7 +55,8 @@ def build(bld):
         'model/kmean_code/KMlocal.h',
         'model/kmean_code/KMrand.h',
         'model/kmean_code/KMterm.h',
-        'model/kmean_code/kmlsample.h'
+        'model/kmean_code/kmlsample.h',
+	'model/qhs.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:
