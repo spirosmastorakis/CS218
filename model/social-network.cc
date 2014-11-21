@@ -1411,6 +1411,9 @@ SocialNetwork::HandleInterest(PktHeader *header)
                 else //requester and content provider (me) are in different communities
                 {
                     NS_LOG_INFO("Requester and content provider are in different communities");
+                    // Qiuhan: m_relationship->GetFringeNodeSet(requesterCommunityId), and using for loop to send interest to all these node
+                    // Qiuhan: Or if the node itself exist in the fringe node set,
+                    // whether will it send by itself? and not send to other fringe node
                     Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(requesterCommunityId);
                     NS_LOG_INFO("Best border node is: "<<bestBorderNode);
                     NS_LOG_INFO("SAIGON "<<bestBorderNode);
@@ -1543,6 +1546,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
              //content provider or I do not know.
         {
             NS_LOG_INFO("XIAO");
+            // Qiuhan: What is the function of borderNodeId equal to 0.0.0.0
             if (borderNodeId.IsEqual(Ipv4Address("0.0.0.0")) &&
                 foreignDestinationId.IsEqual(Ipv4Address("0.0.0.0")))
             {
@@ -1592,6 +1596,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
         NS_LOG_INFO("Owner of content "<< requestedContent <<" is: "<<contentOwner);
         if (contentOwner.IsEqual(currentNodeAddress)) //I have the content
         {
+          // Qiuhan: Put this together with the former case when the node itself has the content? Since the code is absolutely the same
             if (encounterNode.IsEqual(requesterId)) //encounter is the requester => no need to
                                                     //social tie or anything. Just send DATA directly
             {
@@ -1667,6 +1672,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
             if ( !(contentProviderId.IsEqual(Ipv4Address("0.0.0.0"))) )
             //I am a relay node for an interest packet towards a known content provider
             {
+              // Qiuhan: this part also need restructured
                 //The known content provider can be in the same community or in foreign community
                 PendingResponseEntry entry(requesterId, contentProviderId,
                             requestedContent, broadcastId, foreignDestinationId, requesterCommunityId, Ipv4Address("0.0.0.0"));
@@ -1686,6 +1692,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
                 uint32_t content_owner_community_id = m_contentManager->GetCommunityIdOfOwnerOfContent(contentOwner);
                 if (content_owner_community_id != m_communityId) //the node that has the content is in different community from me
                 {
+                  // Qiuhan: need restructured, maybe we can add a function called sendPacketToForeignCommunity
                     Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(content_owner_community_id);
                     NS_LOG_INFO("SAIGON "<<bestBorderNode);
                     if (bestBorderNode.IsEqual(currentNodeAddress)) //I happen to be the best border node
@@ -1753,7 +1760,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
                         global_count_interest++;
                     }
                 }
-                
+                // Qiuhan: Here we need to send interest to all fringe nodes in all foreign community
                 //also propagate the interest to other communities if I am a clusterhead
                 if ( m_relationship->HasHighestSocialLevel(currentNodeAddress, m_communityId) )
                 {
