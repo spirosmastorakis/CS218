@@ -714,7 +714,16 @@ SocialNetwork::HandleHello(PktHeader *header)
     //m_relationship->PrintSocialTable();
     
     DecideWhetherToSendContentNameDigest(header);
-    
+   
+
+    //switch fringe node set with encountered noed
+    fringeNodeSet.UpdateSocialTable((uint32_t *)(m_relationship->GetSocialTableAddress()),
+                                    m_relationship->GetSocialTableSize(),
+                                    (uint32_t *)(socialTableEntry),
+                                    header->GetSocialTieTableSize(),
+                                    encounterAddress);
+    fringeNodeSet.UpdateFringeNodeSet((uint32_t *)(m_relationship->GetSocialTableAddress()),
+                                    m_relationship->GetSocialTableSize()); 
     ///////////////////// Send out pending response if any condition matches ///////////////////////
     
     // 1) Take care of m_pendingDataResponse
