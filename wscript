@@ -31,9 +31,13 @@ def build(bld):
         ]
 
     module_test = bld.create_ns3_module_test_library('social-network')
-    module_test.source = [
-        'test/social-network-test-suite.cc',
-        ]
+    module_test.source = bld.path.ant_glob ('test/*.cc')
+
+    #header = bld(features='ns3header')
+    #header.module_test = 'social-network' 
+    #header.source = [
+	#'test/test-qhs.h'
+        #]
 
     headers = bld(features='ns3header')
     headers.module = 'social-network'
