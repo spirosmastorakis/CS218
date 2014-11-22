@@ -30,11 +30,11 @@ public:
 			       uint32_t *newTable, uint32_t newSize,
 			       Ipv4Address ID);
 
-  std::vector<Ipv4Address>
-  UpdateFringeNodeSet (uint32_t *socialTieTable, uint32_t socialTieTableSize);
+  void
+  UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTableSize, std::vector<Ipv4Address> &FringeNodeSet);
 
 private:
-  std::vector<Ipv4Address> FringeNodeSet;
+  //std::vector<Ipv4Address> FringeNodeSet;
   uint32_t m_localCommunity;
 };
 
