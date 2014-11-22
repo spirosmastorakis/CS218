@@ -3,7 +3,6 @@
 
 #include <map>
 #include <utility>
-#include "ns3/social-network.h"
 #include "ns3/relationship.h"
 
 namespace ns3 {

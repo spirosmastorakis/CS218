@@ -13,6 +13,7 @@
 #include "ns3/relationship.h"
 #include "ns3/interest-manager.h"
 #include "ns3/community-manager.h"
+#include "ns3/qhs.h"
 
 using namespace std;
 
@@ -215,7 +216,9 @@ private:
     //leave index 0 blank.
     //last_foreign_encounter_node[2] refers to last foreign encounter node in community 2
     Ipv4Address *m_last_foreign_encounter_node;
-    
+
+    QHS fringeNodeSet;
+
     void ScheduleTransmitHelloPackets (int numberOfHelloEvents);
     Ipv4Address GetNodeAddress(void);
     void HandleData(PktHeader *header);
