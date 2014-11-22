@@ -34,17 +34,16 @@ QHS::~QHS ()
 {
 }
   
-uint32_t*
+uint32_t
 QHS::UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
-			uint32_t *newTable, uint32_t newSize,
-			Ipv4Address ID)
+			uint32_t *newTable, uint32_t newSize)
 {
   std::map<addrPair, SocialTableEntry> map;
   SocialTableEntry *socialTableEntry = (SocialTableEntry *)(*newTable);
   // push entry that may need to updated into a hash map for later reference
   for (int i = 0; i < int (newSize); i++) {
-    if ((socialTableEntry[i].peer1.ID == ID && socialTableEntry[i].peer2.commID != m_localCommunity) || 
-	(socialTableEntry[i].peer2.ID == ID && socialTableEntry[i].peer1.commID != m_localCommunity)) {
+//    if ((socialTableEntry[i].peer1.ID == ID && socialTableEntry[i].peer2.commID != m_localCommunity) || 
+//	(socialTableEntry[i].peer2.ID == ID && socialTableEntry[i].peer1.commID != m_localCommunity)) {
       map[std::make_pair(socialTableEntry[i].peer1.ID,socialTableEntry[i].peer2.ID)] =
         socialTableEntry[i];
     }
@@ -53,17 +52,22 @@ QHS::UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
   SocialTableEntry *originalEntry = (SocialTableEntry *)(*originalTable);
   
   for (int i = 0; i < int (originalSize); i++) { 
-    if ((originalEntry[i].peer1.ID == ID && originalEntry[i].peer2.commID != m_localCommunity) || 
-	(originalEntry[i].peer2.ID == ID && originalEntry[i].peer1.commID != m_localCommunity)) {
+    //if ((originalEntry[i].peer1.ID == ID && originalEntry[i].peer2.commID != m_localCommunity) || 
+//	(originalEntry[i].peer2.ID == ID && originalEntry[i].peer1.commID != m_localCommunity)) {
       auto it = map.find(std::make_pair(originalEntry[i].peer1.ID, originalEntry[i].peer2.ID));
       if (it != map.end()) {
         if (it->second.timestamp > originalEntry[i].timestamp) {
-          originalEntry[i].socialTieValue = it->second.socialTieValue; 
+          originalEntry[i] = *it; 
         }
+	map.erase(std::make_pair(originalEntry[i].peer1.ID, originalEntry[i].peer2.ID));
       }	
-    }
+   // }
   }
-  return originalTable;
+  for (auto it : map) {
+    originalEntry[originalSize] = *it;
+    originalSize++;  
+  }
+  return originalSize;
 }
 
 void

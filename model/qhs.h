@@ -25,9 +25,8 @@ public:
   // originalTable is the social table before encounter
   // newTable is the social table of the encountered node
   // ID is the address of the encountered node
-  uint32_t* UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
-			       uint32_t *newTable, uint32_t newSize,
-			       Ipv4Address ID);
+  uint32_t UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
+			      uint32_t *newTable, uint32_t newSize);
 
   void
   UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTableSize, std::vector<Ipv4Address> &FringeNodeSet);

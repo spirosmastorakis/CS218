@@ -717,11 +717,10 @@ SocialNetwork::HandleHello(PktHeader *header)
    
 
     //switch fringe node set with encountered noed
-    fringeNodeSet.UpdateSocialTable((uint32_t *)(m_relationship->GetSocialTableAddress()),
-                                    m_relationship->GetSocialTableSize(),
-                                    (uint32_t *)(socialTableEntry),
-                                    header->GetSocialTieTableSize(),
-                                    encounterAddress);
+    //fringeNodeSet.UpdateSocialTable((uint32_t *)(m_relationship->GetSocialTableAddress()),
+      //                              m_relationship->GetSocialTableSize(),
+        //                            (uint32_t *)(socialTableEntry),
+          //                          header->GetSocialTieTableSize());
     fringeNodeSet.UpdateFringeNodeSet((uint32_t *)(m_relationship->GetSocialTableAddress()),
                                     m_relationship->GetSocialTableSize()); 
     ///////////////////// Send out pending response if any condition matches ///////////////////////
