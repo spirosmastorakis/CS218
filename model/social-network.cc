@@ -391,7 +391,7 @@ SocialNetwork::Send (PacketType packetType)
 PktHeader *
 SocialNetwork::CreateDataPacketHeader(Ipv4Address destinationId, Ipv4Address requesterId,
         Ipv4Address contentRequested, uint32_t requesterCommunityId, Ipv4Address foreignDestinationId,
-        Ipv4Address bestBorderNode, uint32_t broadcastId)
+        vector<Ipv4Address> &bestBorderNode, uint32_t broadcastId)
 {
     PktHeader *header = new PktHeader();
     header->SetSource(GetNodeAddress());
@@ -412,7 +412,7 @@ SocialNetwork::CreateDataPacketHeader(Ipv4Address destinationId, Ipv4Address req
 PktHeader *
 SocialNetwork::CreateInterestPacketHeader(Ipv4Address requesterId, Ipv4Address destinationId,
                 Ipv4Address contentProviderId, Ipv4Address contentRequested, uint32_t broadcastId,
-                uint32_t requesterCommunityId, Ipv4Address foreignDestinationId, Ipv4Address bestBorderNodeId)
+                uint32_t requesterCommunityId, Ipv4Address foreignDestinationId, vector<Ipv4Address> &bestBorderNodeId)
 {
     PktHeader *header = new PktHeader();
     header->SetSource(GetNodeAddress());
@@ -1353,110 +1353,94 @@ SocialNetwork::HandleInterest(PktHeader *header)
         //first time sees this Interest packet
         m_interestManager->Insert(interestEntry);
     }*/
-    
-    if ( m_interestManager->Exist(interestEntry) )
+    Ipv4Address contentOwner = m_contentManager->GetOwnerOfContent(requestedContent);
+    NS_LOG_INFO("Owner of content "<< requestedContent <<" is: "<<contentOwner);
+    if (contentOwner.IsEqual(currentNodeAddress)) //I have the content
     {
-        NS_LOG_INFO("global_count_interest: "<<global_count_interest);
-        NS_LOG_INFO("NNN: "<<interestEntry.requesterId);
-        return;
-    }
-    else
-    {
-        NS_LOG_INFO("KKK: "<<interestEntry.requesterId);
-    }
-    
-    //Note that this node may never send any INTEREST/DATA packet upon seeing an interest
-    //packet. The reason, for example, it does not know who is the content provider
-    //or it does not know the border node to route the packet to. Thus, every time it
-    //sees the same INTEREST packet, we need to always execute the code below.
-        
-    if ( currentNodeAddress.IsEqual(header->GetDestination()) ) //I am the destination
-                                                            //doesn't mean I am the border node or content provider for sure
-                          //a node Y can unicast interest packet to node X that has higher social tie toward content provider
-                          //Thus, X is the destination node Y sends to, but X is not content provider
-    {
-        Ipv4Address contentOwner = m_contentManager->GetOwnerOfContent(requestedContent);
-        NS_LOG_INFO("Owner of content "<< requestedContent <<" is: "<<contentOwner);
-        if (contentOwner.IsEqual(currentNodeAddress)) //I have the content
-        {
-            NS_LOG_INFO("LAUREN");
-            if (encounterNode.IsEqual(requesterId)) //encounter is the requester => no need to
-                                                    //social tie or anything. Just send DATA directly
-            {
-                //Send DATA packet
-                PktHeader *header = CreateDataPacketHeader(encounterNode, requesterId,
-                                        requestedContent, requesterCommunityId,
-                                        foreignDestinationId, Ipv4Address("0.0.0.0"), broadcastId);
-                SendPacket(*header);
-                NS_LOG_INFO("Send DATA packet with content ("<< requestedContent <<") to "<<encounterNode);
-            }
-            else //encounter is not the requester
-            {
-                if (requesterCommunityId == m_communityId) //requester and content provider (me) are in the same community
-                {
-                    NS_LOG_INFO("Requester and content provider are in the same community");
-                    PendingResponseEntry entry(requesterId, requesterId,
-                                requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-                    if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                    {
-                        m_pendingDataResponse->push_back(entry);
-                        NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-                        if (! (m_interestManager->Exist(interestEntry)) )
-                        {
-                            m_interestManager->Insert(interestEntry);
-                            global_count_interest++;
-                        }
-                    }
-                }
-                else //requester and content provider (me) are in different communities
-                {
-                    NS_LOG_INFO("Requester and content provider are in different communities");
-                    // Qiuhan: m_relationship->GetFringeNodeSet(requesterCommunityId), and using for loop to send interest to all these node
-                    // Qiuhan: Or if the node itself exist in the fringe node set,
-                    // whether will it send by itself? and not send to other fringe node
-                    Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(requesterCommunityId);
-                    NS_LOG_INFO("Best border node is: "<<bestBorderNode);
-                    NS_LOG_INFO("SAIGON "<<bestBorderNode);
-                    //m_relationship->PrintSocialTable();
-                    if (bestBorderNode.IsEqual(currentNodeAddress))
-                    {
-                        //social-tie DATA directly to foreign requester
-                        PendingResponseEntry entry(requesterId, requesterId,
-                                requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-                        if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                        {
-                            NS_LOG_INFO("YESYES");
-                            m_pendingDataResponse->push_back(entry);
-                            NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-                            if (! (m_interestManager->Exist(interestEntry)) )
-                            {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
-                            }
-                        }
-                    }
-                    else if ( !(bestBorderNode.IsEqual(Ipv4Address("0.0.0.0"))) )
-                    {
-                        PendingResponseEntry entry(requesterId, bestBorderNode,
-                                    requestedContent, broadcastId, requesterId, requesterCommunityId, bestBorderNode);
-                        if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                        {
-                            m_pendingDataResponse->push_back(entry);
-                            NS_LOG_INFO("Bestbordernode not NULL. Save pending DATA response entry to m_pendingDataResponse");
-                            if (! (m_interestManager->Exist(interestEntry)) )
-                            {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
-                            }
-                        }
-                    }
-                }
-            }
+        NS_LOG_INFO("LAUREN");
+        if (encounterNode.IsEqual(requesterId)) {
+        //encounter is the requester => no need to
+        //social tie or anything. Just send DATA directly
+	//Send DATA packet
+        //Qiuhan: change
+            vector<Ipv4Address>borderNode_t;
+	    //PktHeader *header = CreateDataPacketHeader(encounterNode, requesterId,
+				//requestedContent, requesterCommunityId,
+				//foreignDestinationId, Ipv4Address("0.0.0.0"), broadcastId);
+	    PktHeader *header = CreateDataPacketHeader(encounterNode, requesterId,
+				requestedContent, requesterCommunityId,
+				foreignDestinationId, borderNode_t, broadcastId);
+	    SendPacket(*header);
+	    NS_LOG_INFO("Send DATA packet with content ("<< requestedContent <<") to "<<encounterNode);
         }
-        
-        else if ( !(foreignDestinationId.IsEqual(Ipv4Address("0.0.0.0"))) &&  //foreign node has the content
-             currentNodeAddress.IsEqual(borderNodeId) )
+        else //encounter is not the requester
         {
+	    if (requesterCommunityId == m_communityId) //requester and content provider (me) are in the same community
+	    {
+                //Qiuhan: change
+                vector<Ipv4Address>borderNode_t;
+	        NS_LOG_INFO("Requester and content provider are in the same community");
+	        PendingResponseEntry entry(requesterId, requesterId,
+		     	    requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, borderNode_t);
+	        ProcessPendingDataResponse(entry, interestEntry); 
+	    }
+	    else //requester and content provider (me) are in different communities
+	    {
+	        NS_LOG_INFO("Requester and content provider are in different communities");
+	    // Qiuhan: m_relationship->GetFringeNodeSet(requesterCommunityId), and using for loop to send interest to all these node
+	    // Qiuhan: Or if the node itself exist in the fringe node set,
+	    // whether will it send by itself? and not send to other fringe node
+	        //Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(requesterCommunityId);
+	        //NS_LOG_INFO("Best border node is: "<<bestBorderNode);
+	        //NS_LOG_INFO("SAIGON "<<bestBorderNode);
+                auto Nodeset = fringeNodeSet.find(requestCommunityId);
+	        //m_relationship->PrintSocialTable();
+		if (Nodeset != fringeNodeSet.end())
+		{
+		  for(auto node: Nodeset) {
+	              if (node.IsEqual(currentNodeAddress))
+	              {
+		        //social-tie DATA directly to foreign requester
+                        vector<Ipv4Address>borderNode_t;
+		        PendingResponseEntry entry(requesterId, requesterId,
+	    		    requestedContent, broadcastId, Ipv4Address("0.0.0.0"), 
+			    requesterCommunityId, borderNode_t);
+		        ProcessPendingDataResponse(entry, interestEntry); 
+	              }
+	              else if ( !(node.IsEqual(Ipv4Address("0.0.0.0"))) )
+	              {
+		        PendingResponseEntry entry(requesterId, node,
+		         	    requestedContent, broadcastId, requesterId, requesterCommunityId, Nodeset);
+		        ProcessPendingDataResponse(entry, interestEntry);  
+	              }
+                  }
+		}
+		else
+		{
+		    for(auto Set: fringeNodeSet) {
+		        for(auto node: Set) {
+			    
+		            PendingResponseEntry entry(requesterId, node,
+		         	    requestedContent, broadcastId, requesterId, requesterCommunityId, Set);
+		            ProcessPendingDataResponse(entry, interestEntry);  
+			}
+                    }
+		}
+	    }
+        }
+    }
+    else {    
+	// Qiuhan: I don't have content
+        if ( currentNodeAddress.IsEqual(header->GetDestination()) ) //I am the destination
+        //doesn't mean I am the border node or content provider for sure
+        //a node Y can unicast interest packet to node X that has higher social tie toward content provider
+        //Thus, X is the destination node Y sends to, but X is not content provider
+        {
+      	    auto itr = find(borderNodeId.begin(), borderNodeId.end(), currentNodeAddress); 
+            if ( !(foreignDestinationId.IsEqual(Ipv4Address("0.0.0.0"))) &&  //foreign node has the content
+		 itr != borderNodeId.end())
+                 //currentNodeAddress.IsEqual(borderNodeId) )
+            {
             //Inside here meaning I am the border node.
         
             // example: a node in community 1 requests a content that community 2 owns.
@@ -1464,228 +1448,61 @@ SocialNetwork::HandleInterest(PktHeader *header)
             // if it knows community 2 has the content, it will social-tie INTEREST packet to border
             // node. Here's the border node receives and social-tie the INTEREST packet to
             // content provider in community 2.
-            NS_LOG_INFO("Foreign node has the content. Save pending INTEREST packet to route to foreign content provider.");
-            PendingResponseEntry entry(requesterId, foreignDestinationId,
-                            requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-            if (!CheckIfPendingResponseExist(m_pending_content_dest_node_response,entry))
-            {
-                m_pending_content_dest_node_response->push_back(entry);
-                if (! (m_interestManager->Exist(interestEntry)) )
-                {
-                    m_interestManager->Insert(interestEntry);
-                    global_count_interest++;
-                }
-            }
-        }
-        else if (currentNodeAddress.IsEqual(contentProviderId))
-        {
-            NS_LOG_INFO("DRAGON "<<currentNodeAddress);
-            Ipv4Address contentOwner = m_contentManager->GetOwnerOfContent(requestedContent);
-            //PrintAllContent(m_contentManager->GetContentArray(), m_contentManager->GetContentArraySize());
-            if (contentOwner.IsEqual(currentNodeAddress)) //sanity check: make sure I do have the content
-            {
-                NS_LOG_INFO("Requester "<<requesterId<<" is in community "<<requesterCommunityId);
-                NS_LOG_INFO("Content provider (me) "<<currentNodeAddress<<" is in community "<<m_communityId);
-                if (requesterCommunityId == m_communityId) //requester is in the same community with content provider
-                {
-                    NS_LOG_INFO("Requester and content provider are in the same community");
-                    PendingResponseEntry entry(requesterId, requesterId,
-                                    requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-                    if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                    {
-                        m_pendingDataResponse->push_back(entry);
-                        NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-                        if (! (m_interestManager->Exist(interestEntry)) )
-                        {
-                            m_interestManager->Insert(interestEntry);
-                            global_count_interest++;
-                        }
-                    }
-                }
-                else //requester and content provider are in different communities.
-                {
-                    NS_LOG_INFO("Requester and content provider are in different communities");
-                    Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(requesterCommunityId);
-                    NS_LOG_INFO("SAIGON "<<bestBorderNode);
-                    if (bestBorderNode.IsEqual(currentNodeAddress))
-                    {
-                        //social-tie DATA directly to foreign requester
-                        PendingResponseEntry entry(requesterId, requesterId,
-                                requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-                        if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                        {
-                            m_pendingDataResponse->push_back(entry);
-                            NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-                            if (! (m_interestManager->Exist(interestEntry)) )
-                            {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
-                            }
-                        }
-                    }
-                    else if ( !(bestBorderNode.IsEqual(Ipv4Address("0.0.0.0"))) )
-                    {
-                        PendingResponseEntry entry(requesterId, bestBorderNode,
-                                        requestedContent, broadcastId, requesterId, requesterCommunityId, bestBorderNode);
-                        if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                        {
-                            m_pendingDataResponse->push_back(entry);
-                            NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-                            if (! (m_interestManager->Exist(interestEntry)) )
-                            {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else //I am neither the border node nor the content provider. I have high social-tie towards
+		vector<Ipv4Address>borderNode_t;
+                NS_LOG_INFO("Foreign node has the content. Save pending INTEREST packet to route to foreign content provider.");
+                PendingResponseEntry entry(requesterId, foreignDestinationId,
+                                requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, borderNode_t);
+		ProcessPendingContent(entry, interestEntry);
+                
+            } 
+            else //I am neither the border node nor the content provider. I have high social-tie towards
              //destination. I need to relay this Interest packet => 2 cases: I know who is the
              //content provider or I do not know.
-        {
-            NS_LOG_INFO("XIAO");
+            {
+                NS_LOG_INFO("XIAO");
             // Qiuhan: What is the function of borderNodeId equal to 0.0.0.0
-            if (borderNodeId.IsEqual(Ipv4Address("0.0.0.0")) &&
-                foreignDestinationId.IsEqual(Ipv4Address("0.0.0.0")))
-            {
-                PendingResponseEntry entry(requesterId, Ipv4Address("255.255.255.255"),
-                                           requestedContent, broadcastId, Ipv4Address("0.0.0.0"),
-                                           requesterCommunityId, Ipv4Address("0.0.0.0"));
-                if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
+                //if (borderNodeId.IsEqual(Ipv4Address("0.0.0.0")) &&
+		if (borderNodeId.empty() &&
+                    foreignDestinationId.IsEqual(Ipv4Address("0.0.0.0")))
                 {
-                    //I am not relay to border node or content provider
-                    NS_LOG_INFO("XIAO1");
-                    m_pending_interest_response->push_back(entry);
-                    NS_LOG_INFO("Save pending INTEREST response entry to m_pending_interest_response");
-                    if (! (m_interestManager->Exist(interestEntry)) )
+                    vector<Ipv4Address>borderNode_t;
+                    PendingResponseEntry entry(requesterId, Ipv4Address("255.255.255.255"),
+                                               requestedContent, broadcastId, Ipv4Address("0.0.0.0"),
+                                               requesterCommunityId, borderNode_t);
+		    ProcessPendingInterest(entry, interestEntry);
+                    
+                    if ( !(contentProviderId.IsEqual(Ipv4Address("0.0.0.0"))) &&
+                        foreignDestinationId.IsEqual(Ipv4Address("0.0.0.0")) )
                     {
-                        m_interestManager->Insert(interestEntry);
-                        global_count_interest++;
-                    }
-                }
-                if ( !(contentProviderId.IsEqual(Ipv4Address("0.0.0.0"))) &&
-                      foreignDestinationId.IsEqual(Ipv4Address("0.0.0.0")) )
-                {
-                    NS_LOG_INFO("XIAO2");
-                    if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
-                    {
-                        PendingResponseEntry entry(requesterId, contentProviderId,
-                            requestedContent, broadcastId, foreignDestinationId, requesterCommunityId, Ipv4Address("0.0.0.0"));
-                        if (!CheckIfPendingResponseExist(m_pending_content_dest_node_response,entry))
+                        NS_LOG_INFO("XIAO2");
+                        if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
                         {
-                            NS_LOG_INFO("XIAO3");
-                            m_pending_content_dest_node_response->push_back(entry);
-                            NS_LOG_INFO("Save pending INTEREST response entry to m_pending_content_dest_node_response");
-                            if (! (m_interestManager->Exist(interestEntry)) )
-                            {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
-                            }
+                	    vector<Ipv4Address>borderNode_t;
+                            PendingResponseEntry entry(requesterId, contentProviderId,
+                                requestedContent, broadcastId, foreignDestinationId, 
+                                requesterCommunityId, borderNode_t);
+		            ProcessPendingContent(entry, interestEntry);
+                           
                         }
                     }
                 }
             }
         }
-    }
-    else //I am not the destination of the interest packet
-    {   
-        //Check my local content table. If there is a match, then turn into social-tie routing
-        Ipv4Address contentOwner = m_contentManager->GetOwnerOfContent(requestedContent);
-        NS_LOG_INFO("Owner of content "<< requestedContent <<" is: "<<contentOwner);
-        if (contentOwner.IsEqual(currentNodeAddress)) //I have the content
-        {
-          // Qiuhan: Put this together with the former case when the node itself has the content? Since the code is absolutely the same
-            if (encounterNode.IsEqual(requesterId)) //encounter is the requester => no need to
-                                                    //social tie or anything. Just send DATA directly
-            {
-                //Send DATA packet
-                PktHeader *header = CreateDataPacketHeader(encounterNode, requesterId,
-                                        requestedContent, requesterCommunityId,
-                                        foreignDestinationId, Ipv4Address("0.0.0.0"), broadcastId);
-                SendPacket(*header);
-                NS_LOG_INFO("Send DATA packet with content ("<< requestedContent <<") to "<<encounterNode);
-            }
-            else //encounter is not the requester
-            {
-                if (requesterCommunityId == m_communityId) //requester and content provider (me) are in the same community
-                {
-                    NS_LOG_INFO("Requester and content provider are in the same community");
-                    PendingResponseEntry entry(requesterId, requesterId,
-                                requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-                    if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                    {
-                        m_pendingDataResponse->push_back(entry);
-                        NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-                        if (! (m_interestManager->Exist(interestEntry)) )
-                        {
-                            m_interestManager->Insert(interestEntry);
-                            global_count_interest++;
-                        }
-                    }
-                }
-                else //requester and content provider (me) are in different communities
-                {
-                    NS_LOG_INFO("Requester and content provider are in different communities");
-                    Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(requesterCommunityId);
-                    NS_LOG_INFO("Best border node is: "<<bestBorderNode);
-                    NS_LOG_INFO("SAIGON "<<bestBorderNode);
-                    //m_relationship->PrintSocialTable();
-                    if (bestBorderNode.IsEqual(currentNodeAddress))
-                    {
-                        //social-tie DATA directly to foreign requester
-                        PendingResponseEntry entry(requesterId, requesterId,
-                                requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-                        if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                        {
-                            NS_LOG_INFO("YESYES");
-                            m_pendingDataResponse->push_back(entry);
-                            NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-                            if (! (m_interestManager->Exist(interestEntry)) )
-                            {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
-                            }
-                        }
-                    }
-                    else if ( !(bestBorderNode.IsEqual(Ipv4Address("0.0.0.0"))) )
-                    {
-                        PendingResponseEntry entry(requesterId, bestBorderNode,
-                                    requestedContent, broadcastId, requesterId, requesterCommunityId, bestBorderNode);
-                        if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-                        {
-                            m_pendingDataResponse->push_back(entry);
-                            NS_LOG_INFO("Bestbordernode not NULL. Save pending DATA response entry to m_pendingDataResponse");
-                            if (! (m_interestManager->Exist(interestEntry)) )
-                            {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else //I do not have the content
-        {
+        else //I am not the destination of the interest packet
+        {   
+        
+         //I do not have the content
             if ( !(contentProviderId.IsEqual(Ipv4Address("0.0.0.0"))) )
             //I am a relay node for an interest packet towards a known content provider
             {
               // Qiuhan: this part also need restructured
                 //The known content provider can be in the same community or in foreign community
+                vector<Ipv4Address>borderNode_t;
                 PendingResponseEntry entry(requesterId, contentProviderId,
-                            requestedContent, broadcastId, foreignDestinationId, requesterCommunityId, Ipv4Address("0.0.0.0"));
-                if (!CheckIfPendingResponseExist(m_pending_content_dest_node_response,entry))
-                {
-                    m_pending_content_dest_node_response->push_back(entry);
-                    NS_LOG_INFO("Save pending INTEREST response entry to m_pending_content_dest_node_response");
-                    if (! (m_interestManager->Exist(interestEntry)) )
-                    {
-                        m_interestManager->Insert(interestEntry);
-                        global_count_interest++;
-                    }
-                }
+                            requestedContent, broadcastId, foreignDestinationId, 
+                            requesterCommunityId, borderNode_t);
+		ProcessPendingContent(entry, interestEntry);
+                
             }
             else if ( !(contentOwner.IsEqual(Ipv4Address("0.0.0.0"))) ) //My content table tells me other node has a content
             {
@@ -1693,73 +1510,48 @@ SocialNetwork::HandleInterest(PktHeader *header)
                 if (content_owner_community_id != m_communityId) //the node that has the content is in different community from me
                 {
                   // Qiuhan: need restructured, maybe we can add a function called sendPacketToForeignCommunity
-                    Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(content_owner_community_id);
-                    NS_LOG_INFO("SAIGON "<<bestBorderNode);
-                    if (bestBorderNode.IsEqual(currentNodeAddress)) //I happen to be the best border node
-                    {
-                        PendingResponseEntry entry(requesterId, contentOwner,
-                                requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-                        if (!CheckIfPendingResponseExist(m_pending_content_dest_node_response,entry))
-                        {
-                            m_pending_content_dest_node_response->push_back(entry);
-                            NS_LOG_INFO("Save pending INTEREST response entry to m_pending_content_dest_node_response");
-                            if (! (m_interestManager->Exist(interestEntry)) )
+                    //Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(content_owner_community_id);
+		    auto set = fringeNodeSet.find(content_owner_community_id);
+		    if (set != fringeNodeSet.end()) {
+		        for (auto node:*set) {
+                        //NS_LOG_INFO("SAIGON "<<bestBorderNode);
+                            if (node.IsEqual(currentNodeAddress)) //I happen to be the best border node
                             {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
+                		vector<Ipv4Address>borderNode_t;
+                                PendingResponseEntry entry(requesterId, contentOwner,
+                                        requestedContent, broadcastId, Ipv4Address("0.0.0.0"), 
+					requesterCommunityId, borderNode_t);
+		                ProcessPendingContent(entry, interestEntry);
+                       
                             }
-                        }
-                    }
-                    else if ( !(bestBorderNode.IsEqual(Ipv4Address("0.0.0.0"))) )
-                    {
-                        //social-tie route Interest packet to node that meets most nodes in community J
-                        PendingResponseEntry entry(requesterId, bestBorderNode,
-                                    requestedContent, broadcastId, contentOwner, requesterCommunityId, bestBorderNode);
-                        NS_LOG_INFO("TRANG contentOwner"<<contentOwner);
-                        if (!CheckIfPendingResponseExist(m_pending_content_dest_node_response,entry))
-                        {
-                            m_pending_content_dest_node_response->push_back(entry);
-                            NS_LOG_INFO("Save pending INTEREST response entry to m_pending_content_dest_node_response");
-                            if (! (m_interestManager->Exist(interestEntry)) )
+                            else if ( !(node.IsEqual(Ipv4Address("0.0.0.0"))) )
                             {
-                                m_interestManager->Insert(interestEntry);
-                                global_count_interest++;
+                                //social-tie route Interest packet to node that meets most nodes in community J
+                                PendingResponseEntry entry(requesterId, node,
+                                        requestedContent, broadcastId, contentOwner, requesterCommunityId, *set);
+                                NS_LOG_INFO("TRANG contentOwner"<<contentOwner);
+		                ProcessPendingContent(entry, interestEntry);
+                        
                             }
-                        }
+			}
                     }
                 }
                 else //the node that has the content is in the same community with me
                 {
                     PendingResponseEntry entry(requesterId, contentOwner,
                                 requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-                    if (!CheckIfPendingResponseExist(m_pending_content_dest_node_response,entry))
-                    {
-                        m_pending_content_dest_node_response->push_back(entry);
-                        NS_LOG_INFO("Save pending INTEREST response entry to m_pending_content_dest_node_response");
-                        if (! (m_interestManager->Exist(interestEntry)) )
-                        {
-                            m_interestManager->Insert(interestEntry);
-                            global_count_interest++;
-                        }
-                    }
+		    ProcessPendingContent(entry, interestEntry);
+                   
                 }
             }
             else //I don't know which node has the content
             {
                 //keep this interest packet for local search
+                vector<Ipv4Address>borderNode_t;
                 PendingResponseEntry entry(requesterId, Ipv4Address("255.255.255.255"),
                                            requestedContent, broadcastId, Ipv4Address("0.0.0.0"),
-                                           requesterCommunityId, Ipv4Address("0.0.0.0"));
-                if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
-                {
-                    m_pending_interest_response->push_back(entry);
-                    NS_LOG_INFO("Save pending INTEREST response entry to m_pending_interest_response");
-                    if (! (m_interestManager->Exist(interestEntry)) )
-                    {
-                        m_interestManager->Insert(interestEntry);
-                        global_count_interest++;
-                    }
-                }
+                                           requesterCommunityId, borderNode_t);
+		ProcessPendingInterest(entry, interestEntry);
                 // Qiuhan: Here we need to send interest to all fringe nodes in all foreign community
                 //also propagate the interest to other communities if I am a clusterhead
                 if ( m_relationship->HasHighestSocialLevel(currentNodeAddress, m_communityId) )
@@ -1768,20 +1560,27 @@ SocialNetwork::HandleInterest(PktHeader *header)
                     uint32_t foreignCommunityArraySize = m_foreignCommunityManager->GetCommunityArraySize();
                     for (uint32_t i=0;i<foreignCommunityArraySize;++i)
                     {
-                        Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(foreignCommunityIds[i]);
-                        NS_LOG_INFO("SAIGON "<<bestBorderNode);
-                        if ( !(bestBorderNode.IsEqual(Ipv4Address("0.0.0.0"))) )
-                        {
-                            PendingResponseEntry entry(requesterId, bestBorderNode,
-                                    requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, bestBorderNode);
-                            if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
-                            {
-                                m_pending_interest_response->push_back(entry);
-                                NS_LOG_INFO("Save pending INTEREST response entry to m_pending_interest_response");
+			
+                        //Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(foreignCommunityIds[i]);
+                        //NS_LOG_INFO("SAIGON "<<bestBorderNode);
+			auto set = fringeNodeSet.find(foreignCommunityIds[i]);
+			if (set != fringeNodeSet.end()) {
+			    for (auto node:*set) {
+                        	if ( !(node.IsEqual(Ipv4Address("0.0.0.0"))) )
+                        	{
+                            	    PendingResponseEntry entry(requesterId, node,
+                                        requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, *set);
+		                //ProcessPendingInterest(entry, interestEntry);
+                                    if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
+                                    {
+                                        m_pending_interest_response->push_back(entry);
+                                        NS_LOG_INFO("Save pending INTEREST response entry to m_pending_interest_response");
                                 /*if (! (m_interestManager->Exist(interestEntry)) )
                                 {
                                     m_interestManager->Insert(interestEntry);
                                 }*/
+                                    }
+                                }
                             }
                             //propagate this to border node so that upon HandleHello, if border node directly
                             //encounters a foreign node, it will inject into that community.
@@ -1791,7 +1590,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
                         //Next time I encounter a foreign node, I will inject interest to foreign community.
                     }
                 }
-            }
+            }  
         }
     }
     //}
@@ -1802,7 +1601,8 @@ SocialNetwork::HandleInterest(PktHeader *header)
         // That means I already serve DATA packet for that interest before.
         // No need to serve it again.
     }*/
-    
+ 
+        
 }  
 
 bool
@@ -1823,7 +1623,55 @@ SocialNetwork::CheckIfPendingResponseExist(vector<PendingResponseEntry> *respons
     }
     return false;
 }
-    
+ 
+void 
+SocialNetwork::ProcessPendingDataResponse(PendingResponseEntry &entry, 
+				      InterestEntry &interestEntry)
+{
+    if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
+    {
+        m_pendingDataResponse->push_back(entry);
+        NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
+        if (! (m_interestManager->Exist(interestEntry)) )
+        {
+            m_interestManager->Insert(interestEntry);
+            global_count_interest++;
+        }
+    }
+}
+
+void
+SocialNetwork::ProcessPendingInterest(PendingResponseEntry &entry,
+				      InterestEntry & interestEntry)
+{
+    if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
+    {
+        //I am not relay to border node or content provider
+        m_pending_interest_response->push_back(entry);
+        NS_LOG_INFO("Save pending INTEREST response entry to m_pending_interest_response");
+        if (! (m_interestManager->Exist(interestEntry)) )
+        {
+            m_interestManager->Insert(interestEntry);
+            global_count_interest++;
+        }
+    }
+
+}
+
+void
+SocialNetwork::ProcessPendingContent(PendingResponseEntry &entry,
+				     InterestEntry &interestEntry)
+{
+    if (!CheckIfPendingResponseExist(m_pending_content_dest_node_response,entry))
+    {
+	m_pending_content_dest_node_response->push_back(entry);
+	if (! (m_interestManager->Exist(interestEntry)) )
+	{
+	    m_interestManager->Insert(interestEntry);
+	    global_count_interest++;
+	}
+    }
+}   
 
 }
 
