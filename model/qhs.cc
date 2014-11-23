@@ -70,7 +70,7 @@ QHS::UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
 }
 
 void
-QHS::UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTableSize, std::vector<Ipv4Address> &FringeNodeSet)
+QHS::UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTableSize, std::map<Ipv4Address, uint32_t> &FringeNodeSet)
 { 
   FringeNodeSet.clear ();
   double sum = 0;
@@ -104,11 +104,11 @@ QHS::UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTa
           continue;
         else if (socialTableEntry[i].socialTieValue > equation) {
           if (socialTableEntry[i].peer1.commID != m_localCommunity) {
-            FringeNodeSet.push_back (socialTableEntry[i].peer1.ID);
+            FringeNodeSet.insert (std::pair<Ipv4Address, uint32_t> (socialTableEntry[i].peer1.ID, socialTableEntry[i].peer1.commID));
 	    NS_LOG_DEBUG ("Node added");
           }
           else {
-            FringeNodeSet.push_back (socialTableEntry[i].peer2.ID);
+            FringeNodeSet.insert (std::pair<Ipv4Address, uint32_t> (socialTableEntry[i].peer2.ID, socialTableEntry[i].peer2.commID));
             NS_LOG_DEBUG ("Node added");
           }
         }
