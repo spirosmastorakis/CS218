@@ -220,7 +220,7 @@ private:
     
     // Spyros: Map of <community id, vector<Ipv4Address> >
     std::map<uint32_t, std::vector<Ipv4Address> > fringeNodeSet;
-
+    
     QHS qhs;
 
     void ScheduleTransmitHelloPackets (int numberOfHelloEvents);

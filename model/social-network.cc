@@ -1395,25 +1395,30 @@ SocialNetwork::HandleInterest(PktHeader *header)
 	        //NS_LOG_INFO("SAIGON "<<bestBorderNode);
                 auto Nodeset = fringeNodeSet.find(requestCommunityId);
 	        //m_relationship->PrintSocialTable();
+		
 		if (Nodeset != fringeNodeSet.end())
 		{
-		  for(auto node: Nodeset) {
-	              if (node.IsEqual(currentNodeAddress))
-	              {
-		        //social-tie DATA directly to foreign requester
-                        vector<Ipv4Address>borderNode_t;
-		        PendingResponseEntry entry(requesterId, requesterId,
-	    		    requestedContent, broadcastId, Ipv4Address("0.0.0.0"), 
-			    requesterCommunityId, borderNode_t);
-		        ProcessPendingDataResponse(entry, interestEntry); 
-	              }
-	              else if ( !(node.IsEqual(Ipv4Address("0.0.0.0"))) )
-	              {
-		        PendingResponseEntry entry(requesterId, node,
-		         	    requestedContent, broadcastId, requesterId, requesterCommunityId, Nodeset);
-		        ProcessPendingDataResponse(entry, interestEntry);  
-	              }
-                  }
+                    vector<Ipv4Address>iterator node_itr;
+		    for(node_itr = Nodeset->begin(); node_itr != Nodeset->end(); node_itr++) {
+		        if(node_itr.isEqual(currentNodeAddress)) {
+		            vector<Ipv4Address>borderNode_t;
+		            PendingResponseEntry entry(requesterId, requesterId,
+	    		        requestedContent, broadcastId, Ipv4Address("0.0.0.0"), 
+			        requesterCommunityId, borderNode_t);
+		            ProcessPendingDataResponse(entry, interestEntry);  
+			    break;
+		        }
+		    }
+		    if (node_itr == Nodeset->end()){
+		        for(auto node: *Nodeset) {
+	              	    if ( !(node.IsEqual(Ipv4Address("0.0.0.0"))) )
+	              	    {
+		        	PendingResponseEntry entry(requesterId, node,
+		         	    requestedContent, broadcastId, requesterId, requesterCommunityId, *Nodeset);
+		        	ProcessPendingDataResponse(entry, interestEntry);  
+	              	    }
+                        }
+		    }
 		}
 		else
 		{
@@ -1511,30 +1516,41 @@ SocialNetwork::HandleInterest(PktHeader *header)
                 {
                   // Qiuhan: need restructured, maybe we can add a function called sendPacketToForeignCommunity
                     //Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(content_owner_community_id);
-		    auto set = fringeNodeSet.find(content_owner_community_id);
-		    if (set != fringeNodeSet.end()) {
-		        for (auto node:*set) {
-                        //NS_LOG_INFO("SAIGON "<<bestBorderNode);
-                            if (node.IsEqual(currentNodeAddress)) //I happen to be the best border node
-                            {
-                		vector<Ipv4Address>borderNode_t;
-                                PendingResponseEntry entry(requesterId, contentOwner,
-                                        requestedContent, broadcastId, Ipv4Address("0.0.0.0"), 
-					requesterCommunityId, borderNode_t);
-		                ProcessPendingContent(entry, interestEntry);
-                       
+		    auto Nodeset = fringeNodeSet.find(content_owner_community_id);
+		    if (Nodeset != fringeNodeSet.end()) {
+		        vector<Ipv4Address>iterator node_itr;
+		        for(node_itr = Nodeset->begin(); node_itr != Nodeset->end(); node_itr++) {
+		            if(node_itr.isEqual(currentNodeAddress)) {
+		                vector<Ipv4Address>borderNode_t;
+		                PendingResponseEntry entry(requesterId, requesterId,
+	    		            requestedContent, broadcastId, Ipv4Address("0.0.0.0"), 
+			            requesterCommunityId, borderNode_t);
+		                ProcessPendingDataResponse(entry, interestEntry);  
+			        break;
+		            }
+		        }
+		        if (node_itr == Nodeset->end()){
+		            for(auto node: *Nodeset) {
+	              	        if ( !(node.IsEqual(Ipv4Address("0.0.0.0"))) )
+	              	        {
+		        	    PendingResponseEntry entry(requesterId, node,
+		         	        requestedContent, broadcastId, requesterId, requesterCommunityId, *Nodeset);
+		        	    ProcessPendingDataResponse(entry, interestEntry);  
+	              	        }
                             }
-                            else if ( !(node.IsEqual(Ipv4Address("0.0.0.0"))) )
-                            {
-                                //social-tie route Interest packet to node that meets most nodes in community J
-                                PendingResponseEntry entry(requesterId, node,
-                                        requestedContent, broadcastId, contentOwner, requesterCommunityId, *set);
-                                NS_LOG_INFO("TRANG contentOwner"<<contentOwner);
-		                ProcessPendingContent(entry, interestEntry);
-                        
-                            }
-			}
+		        } 
                     }
+		    else
+		    {
+		        for(auto Set: fringeNodeSet) {
+		            for(auto node: Set) {
+			    
+		                PendingResponseEntry entry(requesterId, node,
+		         	    requestedContent, broadcastId, requesterId, requesterCommunityId, Set);
+		                ProcessPendingDataResponse(entry, interestEntry);  
+			    }
+                        }
+		    }
                 }
                 else //the node that has the content is in the same community with me
                 {
