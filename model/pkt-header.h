@@ -73,8 +73,8 @@ public:
     void SetForeignDestinationId (Ipv4Address foreignDestinationId);
     Ipv4Address GetForeignDestinationId (void) const;
     
-    void SetBestBorderNodeId(Ipv4Address bestBorderNodeId);
-    Ipv4Address GetBestBorderNodeId (void) const;
+    void SetBestBorderNodeId(std::vector<Ipv4Address> bestBorderNodeId);
+    std::vector<Ipv4Address> GetBestBorderNodeId (void) const;
 
 private:
     // These 2 fields uniquely identify an Interest packet
