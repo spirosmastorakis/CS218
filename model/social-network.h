@@ -203,7 +203,7 @@ private:
     InterestManager *m_interestManager;
     InterestManager *m_seenDataManager; //keep track of which data packets seen so far
                                     //We use the same InterestManager since we want essentially
-                                    //the same format for both
+                                   //the same format for both
     CommunityManager *m_foreignCommunityManager; //keep track of foreign communities
     uint32_t m_interestBroadcastId;
     
@@ -217,7 +217,8 @@ private:
     //last_foreign_encounter_node[2] refers to last foreign encounter node in community 2
     Ipv4Address *m_last_foreign_encounter_node;
 
-    QHS fringeNodeSet;
+    vector<Ipv4Address> fringeNodeSet;
+    QHS qhs;
 
     void ScheduleTransmitHelloPackets (int numberOfHelloEvents);
     Ipv4Address GetNodeAddress(void);
