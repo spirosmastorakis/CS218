@@ -18,7 +18,7 @@ class MyTestCase : public TestCase
 {
 public:
   MyTestCase ();
-  void FringeNodes (std::vector<Ipv4Address> &fringeNodes);
+  void FringeNodes (std::map<Ipv4Address, uint32_t> &fringeNodes);
   virtual void DoRun (void); 
 };
 
@@ -27,7 +27,7 @@ MyTestCase::MyTestCase ()
 {
 }
 
-void MyTestCase::FringeNodes (std::vector<Ipv4Address> &fringeNodes)
+void MyTestCase::FringeNodes (std::map<Ipv4Address, uint32_t> &fringeNodes)
 {
   Relationship relationship;
   fringeNodes.clear ();
@@ -67,7 +67,7 @@ void MyTestCase::FringeNodes (std::vector<Ipv4Address> &fringeNodes)
 
 void MyTestCase::DoRun ()
 { 
-  std::vector<Ipv4Address> fringeNodes;
+  std::map<Ipv4Address, uint32_t> fringeNodes;
   FringeNodes (fringeNodes);
 }
 
