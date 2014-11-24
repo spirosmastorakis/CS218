@@ -29,7 +29,7 @@ struct PendingResponseEntry //each entry is uniquely identified by <requesterId,
             this->lastRelayNode[i] = Ipv4Address("0.0.0.0"); //similar to NULL address
         }
         this->foreignDestinationId = Ipv4Address("0.0.0.0");
-        this->bestBorderNodeId = Ipv4Address("0.0.0.0");
+        //this->bestBorderNodeId = Ipv4Address("0.0.0.0");    commented by Haitao
     }
     
     //Only "m_pending_content_dest_node_response" needs to have a valid destinationId

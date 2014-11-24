@@ -36,7 +36,7 @@ QHS::~QHS ()
 {
 }
   
-uint32_t
+void
 QHS::UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
 			uint32_t *newTable, uint32_t newSize)
 { /*

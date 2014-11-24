@@ -333,9 +333,9 @@ PktHeader::GetForeignDestinationId (void) const
 // Qiuhan: change
 //probably needs to be changed. I think it is ok for now....
 void
-PktHeader::SetBestBorderNodeId(std::std<Ipv4Address> bestBorderNodeId)
-{
-  for(auto node: bestBorderNodeId)
+PktHeader::SetBestBorderNodeId(std::vector<Ipv4Address> bestBorderNodeId)
+{ 
+  for(Ipv4Address node: bestBorderNodeId)
   {
     m_bestBorderNodeId.push_back(node);
     m_borderNodeNumber++;
@@ -360,3 +360,4 @@ PktHeader::GetBestBorderNodeId (void) const
 
 
 }
+

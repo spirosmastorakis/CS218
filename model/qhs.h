@@ -25,7 +25,7 @@ public:
   // originalTable is the social table before encounter
   // newTable is the social table of the encountered node
   // ID is the address of the encountered node
-  uint32_t UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
+  void UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
 			      uint32_t *newTable, uint32_t newSize);
 
   void
