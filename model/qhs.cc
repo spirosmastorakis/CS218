@@ -2,6 +2,8 @@
 #include "ns3/log.h"
 #include "ns3/ptr.h"
 
+#include <iterator>
+
 NS_LOG_COMPONENT_DEFINE ("qhs");
 
 namespace ns3 {
@@ -70,9 +72,10 @@ QHS::UpdateSocialTable (uint32_t *originalTable, uint32_t originalSize,
 }
 
 void
-QHS::UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTableSize, std::vector<Ipv4Address> &FringeNodeSet)
+QHS::UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTableSize, std::map<uint32_t, std::vector<Ipv4Address> > &fringeNodeSet, uint32_t localCommunity)
 { 
-  FringeNodeSet.clear ();
+  m_localCommunity = localCommunity;
+  //FringeNodeSet.clear ();
   double sum = 0;
   int number = 0;
   double max = 0;
@@ -98,17 +101,43 @@ QHS::UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTa
     NS_LOG_DEBUG ("I am in push back fringe nodes phase");
     double avg = sum / number;
     float b = 0.5;
+    std::map<uint32_t, std::vector<Ipv4Address> >::iterator it;
+    std::vector<Ipv4Address> vec;
     double equation = avg + b * (max - avg);
     for (int i = 0 ; i < int (socialTieTableSize); i++) {
         if ((socialTableEntry[i].peer1.commID == m_localCommunity) and (socialTableEntry[i].peer2.commID == m_localCommunity))
           continue;
         else if (socialTableEntry[i].socialTieValue > equation) {
           if (socialTableEntry[i].peer1.commID != m_localCommunity) {
-            FringeNodeSet.push_back (socialTableEntry[i].peer1.ID);
+            //FringeNodeSet.insert (std::pair<Ipv4Address, uint32_t> (socialTableEntry[i].peer1.ID, socialTableEntry[i].peer1.commID));
+	    it = fringeNodeSet.find(socialTableEntry[i].peer1.commID);
+	    if (it==fringeNodeSet.end()) {
+	      vec.clear();
+  	      vec.push_back(socialTableEntry[i].peer1.ID); 
+	      fringeNodeSet.insert(std::pair<uint32_t, std::vector<Ipv4Address> > (socialTableEntry[i].peer1.commID, vec));
+	    }
+	    else {
+	      vec.clear();
+              vec = it->second;
+	      vec.push_back(socialTableEntry[i].peer1.ID); 
+	      fringeNodeSet.at(socialTableEntry[i].peer1.commID) = vec;
+            }
 	    NS_LOG_DEBUG ("Node added");
           }
           else {
-            FringeNodeSet.push_back (socialTableEntry[i].peer2.ID);
+            it = fringeNodeSet.find(socialTableEntry[i].peer2.commID);
+            //FringeNodeSet.insert (std::pair<Ipv4Address, uint32_t> (socialTableEntry[i].peer2.ID, socialTableEntry[i].peer2.commID));
+            if (it==fringeNodeSet.end()) {
+  	      vec.clear();
+              vec.push_back(socialTableEntry[i].peer2.ID);
+              fringeNodeSet.insert(std::pair<uint32_t, std::vector<Ipv4Address> > (socialTableEntry[i].peer2.commID, vec)); 
+            }    
+            else {
+	      vec.clear();
+	      vec = it->second;
+	      vec.push_back(socialTableEntry[i].peer2.ID); 
+              fringeNodeSet.at(socialTableEntry[i].peer2.commID) = vec;
+	    }
             NS_LOG_DEBUG ("Node added");
           }
         }
@@ -116,7 +145,7 @@ QHS::UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTa
           continue;  
     }
   }
-  NS_LOG_DEBUG ("Fringe node set size " << FringeNodeSet.size());
+  NS_LOG_DEBUG ("Fringe node set size " << fringeNodeSet.size());
 }
 
 } // namespace ns3

@@ -29,7 +29,7 @@ public:
 			      uint32_t *newTable, uint32_t newSize);
 
   void
-  UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTableSize, std::vector<Ipv4Address> &FringeNodeSet);
+  UpdateFringeNodeSet (SocialTableEntry *socialTieTable, uint32_t socialTieTableSize, std::map<uint32_t, std::vector<Ipv4Address> > &fringeNodeSet, uint32_t localCommunity);
 
 private:
   //std::vector<Ipv4Address> FringeNodeSet;
