@@ -557,8 +557,8 @@ SocialNetwork::HandleData(PktHeader *header)
     uint32_t requesterCommunityId = header->GetRequesterCommunityId();
     Ipv4Address destinationId = header->GetDestination();
     uint32_t interestBroadcastId = header->GetInterestBroadcastId();
-    Ipv4Address bestBorderNode = header->GetBestBorderNodeId();
-    NS_LOG_INFO("TUYHOA bestBorderNode "<<bestBorderNode);
+    std::vector<Ipv4Address> bestBorderNode = header->GetBestBorderNodeId();
+    //NS_LOG_INFO("TUYHOA bestBorderNode "<<bestBorderNode);
     
     InterestEntry entry(requesterId, interestBroadcastId, requestedContent);
     if ( !(requesterId.IsEqual(Ipv4Address("1.0.0.1"))) || interestBroadcastId!=0)
@@ -612,40 +612,49 @@ SocialNetwork::HandleData(PktHeader *header)
             NS_LOG_INFO ("Total Interest packets: "<<global_count_interest);
             NS_LOG_INFO ("Total Data packets: "<<global_count_data);
         }
-        else if ( currentNode.IsEqual(bestBorderNode) )
-        {
-            NS_LOG_INFO("I am the border node to relay DATA to original requester community");
-            NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-            PendingResponseEntry entry(requesterId, requesterId, requestedContent,
-                                       interestBroadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
-            m_pendingDataResponse->push_back(entry);
-        }
-		//This next else if is important. A node in community2
-		//might inject DATA packet to community 1 so it sets 
-		//destination address to this node.
-		//Thus, this node may not be requester or border node.
-		//After this node has the packet, we want this node
-		//to social tie the DATA packet to the requester.
-		else if (m_communityId == requesterCommunityId)
-		{
-			PendingResponseEntry entry(requesterId, requesterId, requestedContent, interestBroadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId,
-									Ipv4Address("0.0.0.0"));
+	//This next else if is important. A node in community2
+	//might inject DATA packet to community 1 so it sets 
+	//destination address to this node.
+	//Thus, this node may not be requester or border node.
+	//After this node has the packet, we want this node
+	//to social tie the DATA packet to the requester.
+	else if (m_communityId == requesterCommunityId)
+	{
+                vector<Ipv4Address> borderNode_t;
+		PendingResponseEntry entry(requesterId, requesterId, requestedContent, interestBroadcastId, 
+                                           Ipv4Address("0.0.0.0"), requesterCommunityId, borderNode_t);
 			 
-			if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
-			{
-				NS_LOG_INFO("LONGLONG2");
-				m_pendingDataResponse->push_back(entry);
-				NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
-			}
-	
+		if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
+		{
+			NS_LOG_INFO("LONGLONG2");
+			m_pendingDataResponse->push_back(entry);
+			NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
 		}
+	
+	}
+        else
+        {
+                for (auto node : bestBorderNode)
+                {
+                    if(node.IsEqual(currentNode))
+                    {
+                        NS_LOG_INFO("I am the border node to relay DATA to original requester community");
+                        NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
+                        vector<Ipv4Address> borderNode_t;
+                        PendingResponseEntry entry(requesterId, requesterId, requestedContent,
+                                       interestBroadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address, borderNode_t);
+                        m_pendingDataResponse->push_back(entry);
+                    }
+                }
+        }
     }
     else
     {
         NS_LOG_INFO("Current node is "<<currentNode<<" destination is "<<destinationId);
         
+        vector<Ipv4Address> borderNode_t;
         PendingResponseEntry entry(requesterId, destinationId, requestedContent,
-                                   interestBroadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, Ipv4Address("0.0.0.0"));
+                                   interestBroadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, borderNode_t);
         if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
         {
             m_pendingDataResponse->push_back(entry);
@@ -1248,7 +1257,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
     uint32_t broadcastId = header->GetInterestBroadcastId();
     Ipv4Address requestedContent = header->GetRequestedContent();
     Ipv4Address foreignDestinationId = header->GetForeignDestinationId();
-    Ipv4Address borderNodeId = header->GetBestBorderNodeId();
+    std::vector<Ipv4Address> borderNodeId = header->GetBestBorderNodeId();
     NS_LOG_INFO("Packet type: "<<GetPacketTypeName(header->GetPacketType()));
     NS_LOG_INFO("Interest packet - requesterId: "<<requesterId);
     NS_LOG_INFO("Interest packet - requesterCommunityId: "<<requesterCommunityId);
@@ -1256,7 +1265,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
     NS_LOG_INFO("Interest packet - broadcastId: "<<broadcastId);
     NS_LOG_INFO("Interest packet - requestedContent: "<<requestedContent);
     NS_LOG_INFO("Interest packet - foreignDestinationId: "<<foreignDestinationId);
-    NS_LOG_INFO("Interest packet - borderNodeId: "<<borderNodeId);
+    //NS_LOG_INFO("Interest packet - borderNodeId: "<<borderNodeId);
     NS_LOG_INFO("Interest packet - destinationNodeId: "<<header->GetDestination());
     //NS_LOG_INFO("This node has: "<<GetAllContentInOneString(m_contentManager->GetContentArray(),
     //                                                        m_contentManager->GetContentArraySize()));
@@ -1363,7 +1372,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
         //social tie or anything. Just send DATA directly
 	//Send DATA packet
         //Qiuhan: change
-            vector<Ipv4Address>borderNode_t;
+            vector<Ipv4Address> borderNode_t;
 	    //PktHeader *header = CreateDataPacketHeader(encounterNode, requesterId,
 				//requestedContent, requesterCommunityId,
 				//foreignDestinationId, Ipv4Address("0.0.0.0"), broadcastId);
@@ -1378,7 +1387,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
 	    if (requesterCommunityId == m_communityId) //requester and content provider (me) are in the same community
 	    {
                 //Qiuhan: change
-                vector<Ipv4Address>borderNode_t;
+                vector<Ipv4Address> borderNode_t;
 	        NS_LOG_INFO("Requester and content provider are in the same community");
 	        PendingResponseEntry entry(requesterId, requesterId,
 		     	    requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, borderNode_t);
@@ -1419,6 +1428,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
 	              	    }
                         }
 		    }
+
 		}
 		else
 		{
@@ -1632,9 +1642,15 @@ SocialNetwork::CheckIfPendingResponseExist(vector<PendingResponseEntry> *respons
              ( (responseVec->at(i)).broadcastId == entry.broadcastId) &&
              ( (responseVec->at(i)).foreignDestinationId).IsEqual(entry.foreignDestinationId) &&
              ( (responseVec->at(i)).requesterCommunityId == entry.requesterCommunityId) &&
-             ( (responseVec->at(i)).bestBorderNodeId). IsEqual(entry.bestBorderNodeId) )
+             ( (responseVec->at(i)).bestBorderNodeId).size() == entry.bestBorderNodeId.size() )
         {
-            return true;
+             for (int j = 0; j < entry.bestBorderNodeId.size(); j++) {
+                  if(!((responseVec->at(i)).bestBorderNodeId)[j].IsEqual(entry.bestBorderNodeId[j]))
+                  {
+                      return false;
+                  }
+             }
+             return true;
         }
     }
     return false;
