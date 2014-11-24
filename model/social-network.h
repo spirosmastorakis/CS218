@@ -217,8 +217,8 @@ private:
     //last_foreign_encounter_node[2] refers to last foreign encounter node in community 2
     Ipv4Address *m_last_foreign_encounter_node;
     
-    // Spyros: Map of <Ipv4Address, community id>
-    std::map<Ipv4Address, uint32_t> fringeNodeSet;
+    // Spyros: Map of <community id, vector<Ipv4Address> >
+    std::map<uint32_t, std::vector<Ipv4Address> > fringeNodeSet;
     QHS qhs;
 
     void ScheduleTransmitHelloPackets (int numberOfHelloEvents);

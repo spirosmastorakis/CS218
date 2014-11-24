@@ -723,7 +723,7 @@ SocialNetwork::HandleHello(PktHeader *header)
           //                          header->GetSocialTieTableSize());
     fringeNodeSet.clear();
     qhs.UpdateFringeNodeSet((m_relationship->GetSocialTableAddress()),
-                                    m_relationship->GetSocialTableSize(), fringeNodeSet); 
+                                    m_relationship->GetSocialTableSize(), fringeNodeSet, m_communityId); 
     ///////////////////// Send out pending response if any condition matches ///////////////////////
     
     // 1) Take care of m_pendingDataResponse
