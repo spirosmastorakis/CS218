@@ -37,7 +37,7 @@ struct PendingResponseEntry //each entry is uniquely identified by <requesterId,
     PendingResponseEntry(Ipv4Address requesterId, Ipv4Address destinationId, 
                          Ipv4Address contentRequested, uint32_t broadcastId,
                          Ipv4Address foreignDestinationId, uint32_t requesterCommunityId,
-                         vector<Ipv4Address> &bestBorderNodeId)
+                         Ipv4Address *borderNode, uint32_t borderNodeSize)
     {
         this->requesterId = requesterId;
         this->destinationId = destinationId; //final destination for this pending entry
@@ -53,7 +53,8 @@ struct PendingResponseEntry //each entry is uniquely identified by <requesterId,
         this->foreignDestinationId = foreignDestinationId; //if this value is "0.0.0.0", it sifnifies that there is no
                                                         //routing to border node. Otherwise, we are routing to border node.
         this->requesterCommunityId = requesterCommunityId;
-        this->bestBorderNodeId = bestBorderNodeId;
+        this->borderNode = borderNode;
+	this->borderNodeSize = borderNodeSize;
         
     }
     Ipv4Address requesterId; //Relay node needs this information because requesterId
@@ -69,7 +70,8 @@ struct PendingResponseEntry //each entry is uniquely identified by <requesterId,
     uint32_t broadcastId; //Don't need this when sending DATA packet.
     Ipv4Address foreignDestinationId;
     uint32_t requesterCommunityId;
-    vector<Ipv4Address> bestBorderNodeId;
+    Ipv4Address *borderNode;
+    uint32_t borderNodeSize;
 };
 
 class Socket;
@@ -231,12 +233,13 @@ private:
     void HandleDigest(PktHeader *header);
     PktHeader *CreateDataPacketHeader(Ipv4Address destinationId, Ipv4Address requesterId,
                     Ipv4Address contentRequested, uint32_t requesterCommunityId,
-                    Ipv4Address foreignDestinationId, vector<Ipv4Address> &bestBorderNode, uint32_t broadcastId);
+                    Ipv4Address foreignDestinationId, Ipv4Address *borderNode, uint32_t borderNodeSize,
+                    uint32_t broadcastId);
     PktHeader *CreateHelloPacketHeader();
     PktHeader *CreateInterestPacketHeader(Ipv4Address requesterId, Ipv4Address destinationId,
                 Ipv4Address contentProviderId, Ipv4Address contentRequested, uint32_t broadcastId, 
                 uint32_t requesterCommunityId, Ipv4Address foreignDestinationId,
-                vector<Ipv4Address> &bestBorderNodeId);
+                Ipv4Address *borderNode, uint32_t borderNodeSize);
     PktHeader *CreateDigestPacketHeader(Ipv4Address destinationId);
     void HandlePendingDataResponse(PktHeader *header);
     void HandlePendingInterestResponse(PktHeader *header);

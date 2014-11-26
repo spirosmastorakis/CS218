@@ -71,14 +71,18 @@ PktHeader::Serialize (Buffer::Iterator start) const
     i.WriteHtonU32 (m_requesterId.Get ());
     i.WriteHtonU32 (m_contentProviderId.Get ());
 	
-	i.WriteHtonU32 (m_communityId);
-	i.WriteHtonU32 (m_requesterCommunityId);
+    i.WriteHtonU32 (m_communityId);
+    i.WriteHtonU32 (m_requesterCommunityId);
 	
-	i.WriteHtonU32 (m_foreignDestinationId.Get ());
-        for (int k = 0; k< int(m_bestBorderNodeId.size ()); k++){
+    i.WriteHtonU32 (m_foreignDestinationId.Get ());
+
+    i.WriteHtonU32 ((uint32_t)m_borderNode);
+    i.WriteHtonU32 (m_borderNodeSize);	
+
+       /* for (int k = 0; k< int(m_bestBorderNodeId.size ()); k++){
 		i.WriteHtonU32 (m_bestBorderNodeId[k].Get ());
     	}
-	i.WriteHtonU32 (m_borderNodeNumber);
+	i.WriteHtonU32 (m_borderNodeNumber);*/
 }
 
 uint32_t
@@ -109,7 +113,10 @@ PktHeader::Deserialize (Buffer::Iterator start)
 	m_requesterCommunityId = i.ReadNtohU32 ();
 	
 	m_foreignDestinationId.Set (i.ReadNtohU32 ());
-	m_bestBorderNodeId.clear();
+
+   	m_borderNode = (uint32_t *)(i.ReadNtohU32 ());
+   	m_borderNodeSize = i.ReadNtohU32 ();
+	/*m_bestBorderNodeId.clear();
 	int k = 0;
 	Buffer::Iterator temp = i;
 	temp.Next (4);
@@ -119,7 +126,7 @@ PktHeader::Deserialize (Buffer::Iterator start)
 		temp.Next (4);
 	}
 	
-    m_borderNodeNumber = m_bestBorderNodeId.size();
+    m_borderNodeNumber = m_bestBorderNodeId.size();*/
     return GetSerializedSize ();
 }
 
@@ -127,7 +134,7 @@ uint32_t
 PktHeader::GetSerializedSize (void) const
 {
     // Multiply by 17 for # of variables serialized
-    return ((16+int(m_borderNodeNumber)) * (sizeof (uint32_t)));
+    return (18 * (sizeof (uint32_t)));
 }
 
 void
@@ -331,33 +338,29 @@ PktHeader::GetForeignDestinationId (void) const
 }
 
 // Qiuhan: change
-//probably needs to be changed. I think it is ok for now....
 void
-PktHeader::SetBestBorderNodeId(std::vector<Ipv4Address> bestBorderNodeId)
+PktHeader::SetBorderNode(uint32_t *borderNode)
 { 
-  for(Ipv4Address node: bestBorderNodeId)
-  {
-    m_bestBorderNodeId.push_back(node);
-    m_borderNodeNumber++;
-  }
+	m_borderNode = borderNode;
 }
-/*
+ 
+uint32_t *
+PktHeader::GetBorderNode(void) const
+{
+	return m_borderNode;
+}
+
 void
-PktHeader::SetBestBorderNodeId(Ipv4Address bestBorderNodeId)
+PktHeader::SetBorderNodeSize(uint32_t borderNodeSize)
 {
-    m_bestBorderNodeId.push_back (bestBorderNodeId);
-    m_borderNodeNumber++;
-}*/
-
-
-//needs to be changed
-std::vector<Ipv4Address>
-//Ipv4Address
-PktHeader::GetBestBorderNodeId (void) const
-{
-    return m_bestBorderNodeId;
+	m_borderNodeSize = borderNodeSize;
 }
 
+uint32_t
+PktHeader::GetBorderNodeSize(void) const
+{
+	return m_borderNodeSize;
+}
 
 }
 

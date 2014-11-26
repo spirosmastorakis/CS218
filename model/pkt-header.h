@@ -73,8 +73,11 @@ public:
     void SetForeignDestinationId (Ipv4Address foreignDestinationId);
     Ipv4Address GetForeignDestinationId (void) const;
     
-    void SetBestBorderNodeId(std::vector<Ipv4Address> bestBorderNodeId);
-    std::vector<Ipv4Address> GetBestBorderNodeId (void) const;
+    void SetBorderNode (uint32_t *borderNode);
+    uint32_t *GetBorderNode (void) const;
+
+    void SetBorderNodeSize(uint32_t borderNodeSize);
+    uint32_t GetBorderNodeSize(void) const;
 
 private:
     // These 2 fields uniquely identify an Interest packet
@@ -94,8 +97,9 @@ private:
     Ipv4Address m_contentProviderId;
     uint32_t m_requesterCommunityId;
     Ipv4Address m_foreignDestinationId;
-    std::vector<Ipv4Address> m_bestBorderNodeId;
-    uint32_t m_borderNodeNumber;
+    uint32_t *m_borderNode;
+    //std::vector<Ipv4Address> m_bestBorderNodeId;
+    uint32_t m_borderNodeSize;
     
     // Add TTL and other stuff
     
