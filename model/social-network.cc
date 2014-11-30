@@ -198,7 +198,7 @@ SocialNetwork::StartApplication (void)
     
     NS_LOG_INFO ("Application starts at: " << Simulator::Now ().GetSeconds ());
     
-    ScheduleTransmitHelloPackets(10000);
+    ScheduleTransmitHelloPackets(1000);
 }
 
 /*
@@ -643,7 +643,7 @@ SocialNetwork::HandleData(PktHeader *header)
 	}
         else
         {
-                for (int i = 0; i < borderNodeSize; i++)
+                for (uint32_t i = 0; i < borderNodeSize; i++)
                 {
                     if(borderNode[i].IsEqual(currentNode))
                     {
@@ -1434,8 +1434,8 @@ SocialNetwork::HandleInterest(PktHeader *header)
 		        }
 		    }
 		    if (node_itr == Nodeset.end()){
-			Ipv4Address *temp;
-			for(int k = 0; k < Nodeset.size(); k++) {
+			Ipv4Address *temp = new Ipv4Address[Nodeset.size()];
+			for(uint32_t k = 0; k < Nodeset.size(); k++) {
 				temp[k] = Nodeset[k];
 			}
 		        for(Ipv4Address node: Nodeset) {
@@ -1446,14 +1446,15 @@ SocialNetwork::HandleInterest(PktHeader *header)
 		        	ProcessPendingDataResponse(entry, interestEntry);  
 	              	    }
                         }
+                        delete []temp;
 		    }
 
 		}
 		else
 		{
 		    for(std::map<uint32_t,std::vector<Ipv4Address>>::iterator Set = fringeNodeSet.begin(); Set!=fringeNodeSet.end(); Set++) {
-  	                Ipv4Address *temp;
-		 	for(int k = 0; k < Set->second.size(); k++) {
+  	                Ipv4Address *temp = new Ipv4Address[Set->second.size()];
+		 	for(uint32_t k = 0; k < Set->second.size(); k++) {
 			    temp[k] = Set->second[k];
 			}
 		        for(Ipv4Address node: Set->second) {
@@ -1463,6 +1464,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
 		         	    requestedContent, broadcastId, requesterId, requesterCommunityId, temp, Set->second.size());
 		            ProcessPendingDataResponse(entry, interestEntry);  
 			}
+                        delete []temp;
                     }
 		}
 	    }
@@ -1475,7 +1477,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
         //a node Y can unicast interest packet to node X that has higher social tie toward content provider
         //Thus, X is the destination node Y sends to, but X is not content provider
         {
-	    int i;
+	    uint32_t i;
 	    for(i = 0; i < borderNodeSize; i++) {
 	    	if(borderNode[i].IsEqual(currentNodeAddress))
 		    break;
@@ -1563,8 +1565,8 @@ SocialNetwork::HandleInterest(PktHeader *header)
 		    if (Nodeset_itr != fringeNodeSet.end()) {
 		        //std::vecddtor<Ipv4Address>::iterator node_itr;
                         std::vector<Ipv4Address> Nodeset = Nodeset_itr->second;
-			Ipv4Address *temp;
-			int i = 0;
+			Ipv4Address *temp = new Ipv4Address[Nodeset.size()];
+			uint32_t i = 0;
 			for(Ipv4Address itr:Nodeset) {
 				temp[i++] = itr;
 			}
@@ -1578,6 +1580,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
 
 			    }
 			}
+                        delete []temp;
                         /*for(node_itr = Nodeset.begin(); node_itr != Nodeset.end(); node_itr++) {
 		            if(node_itr->IsEqual(currentNodeAddress)) {
 		                vector<Ipv4Address> borderNode_t;
@@ -1602,7 +1605,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
 		    else
 		    {
 		        for(std::map<uint32_t, std::vector<Ipv4Address>>::iterator Set = fringeNodeSet.begin(); Set != fringeNodeSet.end(); Set++) {
-			    Ipv4Address *temp;
+			    Ipv4Address *temp = new Ipv4Address[Set->second.size()];
 			    int i = 0;
 			    for(Ipv4Address itr: Set->second) {
 				temp[i++] = itr;
@@ -1613,6 +1616,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
 		         	    requestedContent, broadcastId, requesterId, requesterCommunityId, temp, Set->second.size());
 		                ProcessPendingDataResponse(entry, interestEntry);  
 			    }
+                            delete []temp;
                         }
 		    }
                 }
@@ -1646,7 +1650,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
                         //NS_LOG_INFO("SAIGON "<<bestBorderNode);
 			std::vector<Ipv4Address> set = fringeNodeSet.find(foreignCommunityIds[i])->second;
 			if (set != fringeNodeSet.end()->second) {
-			    Ipv4Address *temp;
+			    Ipv4Address *temp = new Ipv4Address[set.size()];
 			    int i = 0;
 			    for(Ipv4Address itr : set) {
 			        temp[i++] = itr;
@@ -1668,6 +1672,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
                                     }
                                 }
                             }
+                            delete []temp;
                             //propagate this to border node so that upon HandleHello, if border node directly
                             //encounters a foreign node, it will inject into that community.
                             //We do that because border node has high chance to encounter foreign nodes.
