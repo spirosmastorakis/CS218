@@ -402,7 +402,7 @@ CentralityTableEntry *Relationship::GetHigherCentralityNodes (uint32_t &size)
 void Relationship::ComputeCentrality ()
 {    
     centralityTableSize = 0; // Start table over every time centrality is computed
-    double alpha = 0.5; // 
+    //Commented by Haitao double alpha = 0.5; // 
     uint32_t index;
     CentralityTableEntry c;
  
@@ -411,7 +411,7 @@ void Relationship::ComputeCentrality ()
     {
         // Look for matching node IDs in centrality table
         // If ID found then the node doesn't need to be added to centrality table because it already exist
-	    for (index = 0; index < centralityTableSize; index++)
+        for (index = 0; index < centralityTableSize; index++)
         {
             if ((socialTable[i].peer1.ID == centralityTable[index].node.ID) || 
 				(socialTable[i].peer1.commID != socialTable[i].peer2.commID))
@@ -422,45 +422,44 @@ void Relationship::ComputeCentrality ()
         if (index == centralityTableSize)
         {
             // Count the unique occurences of peer encounters w/in community
-            uint32_t nodeCount = UniqueNodeCount (socialTable[i].peer1.commID);
-            
-			double RkSum = 0; // social tie sum
-			double RkSquSum = 0; // social tie sqared sum
+            //Commented by Haitao uint32_t nodeCount = UniqueNodeCount (socialTable[i].peer1.commID);
+            double RkSum = 0; // social tie sum
+            double RkSquSum = 0; // social tie sqared sum
 			//uint16_t n = 0; // Number of nodes observed
+            // Sum up the Rk values and increment n
+            for (uint32_t j=i; j < socialTableSize; j++)
+            {
+                // Compare the id of candidate to every other node in table
+                // and check if peer node is in the same community
+                if ((socialTable[i].peer1.ID == socialTable[j].peer1.ID) && 
+                        (socialTable[i].peer1.commID == socialTable[j].peer2.commID))
+		{
+                    RkSum = RkSum + socialTable[j].socialTieValue;
+                    RkSquSum = RkSquSum + pow(socialTable[j].socialTieValue,2);
+                    //n++;
+                }
+            }
 			
-			// Sum up the Rk values and increment n
-			for (uint32_t j=i; j < socialTableSize; j++)
-			{
-				// Compare the id of candidate to every other node in table
-				// and check if peer node is in the same community
-				if ((socialTable[i].peer1.ID == socialTable[j].peer1.ID) && 
-					(socialTable[i].peer1.commID == socialTable[j].peer2.commID))
-				{
-					RkSum = RkSum + socialTable[j].socialTieValue;
-					RkSquSum = RkSquSum + pow(socialTable[j].socialTieValue,2);
-					//n++;
-				}
-			}
-			
-			if (RkSum > 0)
-			{
-				double equPt1;
-				double equPt2;
-				// First part of the equation
-				//equPt1 = alpha * (RkSum)/n;
-				equPt1 = alpha * (RkSum)/nodeCount;
+            if (RkSum > 0)
+            {
+                //double equPt1;
+                //double equPt2;
+		// First part of the equation
+		//equPt1 = alpha * (RkSum)/n;
+		//Commented by Haitao equPt1 = alpha * (RkSum)/nodeCount;
 
-				// Second part of the equation
-				//equPt2 = (1 - alpha) * pow(RkSum,2) / (n * RkSquSum);
-				equPt2 = (1 - alpha) * pow(RkSum,2) / (nodeCount * RkSquSum);
+		// Second part of the equation
+		//equPt2 = (1 - alpha) * pow(RkSum,2) / (n * RkSquSum);
+		//Commented by Haitao equPt2 = (1 - alpha) * pow(RkSum,2) / (nodeCount * RkSquSum);
 				
-				// Insert Node ID into centrality entry
-				c.node = socialTable[i].peer1;
-				// Compute centrality for entry
-				c.centrality = equPt1 + equPt2;
+		// Insert Node ID into centrality entry
+		c.node = socialTable[i].peer1;
+		// Compute centrality for entry
+		//Commented by Haitao c.centrality = equPt1 + equPt2;
+                c.centrality = pow(RkSum, 3)/RkSquSum;
 				
-				centralityTable[index] = c; // Insert centrality entry
-				centralityTableSize++; // Increment the size of of the centrality table because entry was made
+		centralityTable[index] = c; // Insert centrality entry
+		centralityTableSize++; // Increment the size of of the centrality table because entry was made
             }
             else
             {
