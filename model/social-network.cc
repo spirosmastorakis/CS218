@@ -617,9 +617,11 @@ SocialNetwork::HandleData(PktHeader *header)
                 m_firstSuccess = true;
             } else {
                 NS_LOG_INFO("SUCCESS SECOND");
-	  	NS_LOG_INFO ("Total Hello packets: "<<global_count_hello);
-        	NS_LOG_INFO ("Total Interest packets: "<<global_count_interest);
-	        NS_LOG_INFO ("Total Data packets: "<<global_count_data);
+	  	//NS_LOG_INFO ("Total Hello packets: "<<global_count_hello);
+        	//NS_LOG_INFO ("Total Interest packets: "<<
+		NS_LOG_INFO (global_count_interest);
+	        //NS_LOG_INFO ("Total Data packets: "<<
+		NS_LOG_INFO (global_count_data);
             }
             NS_LOG_INFO ("Requester node "<<currentNode<<" receives requested content "<<
                          requestedContent <<" from node: "<<header->GetSource()); 
