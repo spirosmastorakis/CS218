@@ -609,16 +609,20 @@ SocialNetwork::HandleData(PktHeader *header)
         {
             if (m_firstSuccess == false) {
                 NS_LOG_INFO ("SUCCESS FIRST");
+		NS_LOG_INFO ("Time now ");
+		NS_LOG_INFO (Simulator::Now ().GetSeconds ());
+            	NS_LOG_INFO ("Total Hello packets: "<<global_count_hello);
+            	NS_LOG_INFO ("Total Interest packets: "<<global_count_interest);
+            	NS_LOG_INFO ("Total Data packets: "<<global_count_data);
                 m_firstSuccess = true;
             } else {
                 NS_LOG_INFO("SUCCESS SECOND");
+	  	NS_LOG_INFO ("Total Hello packets: "<<global_count_hello);
+        	NS_LOG_INFO ("Total Interest packets: "<<global_count_interest);
+	        NS_LOG_INFO ("Total Data packets: "<<global_count_data);
             }
             NS_LOG_INFO ("Requester node "<<currentNode<<" receives requested content "<<
-                         requestedContent <<" from node: "<<header->GetSource());
-            NS_LOG_INFO ("Time now " << Simulator::Now ().GetSeconds ());
-            NS_LOG_INFO ("Total Hello packets: "<<global_count_hello);
-            NS_LOG_INFO ("Total Interest packets: "<<global_count_interest);
-            NS_LOG_INFO ("Total Data packets: "<<global_count_data);
+                         requestedContent <<" from node: "<<header->GetSource()); 
         }
 	//This next else if is important. A node in community2
 	//might inject DATA packet to community 1 so it sets 
