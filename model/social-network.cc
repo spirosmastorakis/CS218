@@ -378,9 +378,9 @@ SocialNetwork::Send (PacketType packetType)
     
     SendPacket(*header);
 
-    NS_LOG_INFO("");
-    NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s node "<< GetNodeAddress() <<
-                 " broadcasts " << GetPacketTypeName(packetType) << " on port " << m_peerPort);
+    //NS_LOG_INFO("");
+    //NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s node "<< GetNodeAddress() <<
+                 //" broadcasts " << GetPacketTypeName(packetType) << " on port " << m_peerPort);
 }
 
 //TUAN: I decide to have different create packet header functions since they require different
@@ -519,29 +519,29 @@ SocialNetwork::HandleRead (Ptr<Socket> socket)
         //Read the packet type
         PacketType packetType = header->GetPacketType();
         
-        NS_LOG_INFO ("This node: " << thisIpv4Address );
-        NS_LOG_INFO ("Encounter node: "<< InetSocketAddress::ConvertFrom (from).GetIpv4 () );
-        NS_LOG_INFO ("Encounter time: " << Simulator::Now ().GetSeconds () );
+        //NS_LOG_INFO ("This node: " << thisIpv4Address );
+        //NS_LOG_INFO ("Encounter node: "<< InetSocketAddress::ConvertFrom (from).GetIpv4 () );
+        //NS_LOG_INFO ("Encounter time: " << Simulator::Now ().GetSeconds () );
         
         switch (packetType)
         {
             case HELLO:
-                NS_LOG_INFO ("Receive message type: HELLO");
+                //NS_LOG_INFO ("Receive message type: HELLO");
                 HandleHello(header);
                 break;
                 
             case INTEREST:
-                NS_LOG_INFO ("Receive message type: INTEREST");
+                //NS_LOG_INFO ("Receive message type: INTEREST");
                 HandleInterest(header);
                 break;
             
             case DATA:
-                NS_LOG_INFO ("Receive message type: DATA");
+                //NS_LOG_INFO ("Receive message type: DATA");
                 HandleData(header);
                 break;
                 
             case DIGEST:
-                NS_LOG_INFO ("Receive message type: DIGEST");
+                //NS_LOG_INFO ("Receive message type: DIGEST");
                 HandleDigest(header);
                 break;
                 
@@ -555,8 +555,8 @@ SocialNetwork::HandleRead (Ptr<Socket> socket)
 void
 SocialNetwork::HandleData(PktHeader *header)
 {
-    NS_LOG_INFO("");
-    NS_LOG_INFO("Inside HandleData:");
+    //NS_LOG_INFO("");
+    //NS_LOG_INFO("Inside HandleData:");
     Ipv4Address currentNode = GetNodeAddress();
     Ipv4Address requestedContent = header->GetRequestedContent();
     Ipv4Address requesterId = header->GetRequesterId();
@@ -571,21 +571,21 @@ SocialNetwork::HandleData(PktHeader *header)
     InterestEntry entry(requesterId, interestBroadcastId, requestedContent);
     if ( !(requesterId.IsEqual(Ipv4Address("1.0.0.1"))) || interestBroadcastId!=0)
     {
-        NS_LOG_INFO("HHHHHHHHHHHHHHHHHHHHHH");
-        NS_LOG_INFO(""<<requesterId);
-        NS_LOG_INFO(""<<interestBroadcastId);
+        //NS_LOG_INFO("HHHHHHHHHHHHHHHHHHHHHH");
+        //NS_LOG_INFO(""<<requesterId);
+        //NS_LOG_INFO(""<<interestBroadcastId);
         
     }
     if (! (m_seenDataManager->Exist(entry)) && !(requesterId.IsEqual(currentNode)) )
     {
         global_count_data++;
         m_seenDataManager->Insert(entry);
-        NS_LOG_INFO("NRL");
-        NS_LOG_INFO("requester ID: "<<requesterId);
-        NS_LOG_INFO("broadcast ID: "<<interestBroadcastId);
-        NS_LOG_INFO("requested content: "<<requestedContent);
-        NS_LOG_INFO("global_count_data: "<<global_count_data);
-        NS_LOG_INFO("current node: "<<currentNode);
+        //NS_LOG_INFO("NRL");
+        //NS_LOG_INFO("requester ID: "<<requesterId);
+        //NS_LOG_INFO("broadcast ID: "<<interestBroadcastId);
+        //NS_LOG_INFO("requested content: "<<requestedContent);
+        //NS_LOG_INFO("global_count_data: "<<global_count_data);
+        //NS_LOG_INFO("current node: "<<currentNode);
     }
     
     
@@ -611,9 +611,9 @@ SocialNetwork::HandleData(PktHeader *header)
                 NS_LOG_INFO ("SUCCESS FIRST");
 		NS_LOG_INFO ("Time now ");
 		NS_LOG_INFO (Simulator::Now ().GetSeconds ());
-            	NS_LOG_INFO ("Total Hello packets: "<<global_count_hello);
-            	NS_LOG_INFO ("Total Interest packets: "<<global_count_interest);
-            	NS_LOG_INFO ("Total Data packets: "<<global_count_data);
+            	//NS_LOG_INFO (global_count_hello);
+            	NS_LOG_INFO (global_count_interest);
+            	NS_LOG_INFO (global_count_data);
                 m_firstSuccess = true;
             } else {
                 NS_LOG_INFO("SUCCESS SECOND");
@@ -623,8 +623,8 @@ SocialNetwork::HandleData(PktHeader *header)
 	        //NS_LOG_INFO ("Total Data packets: "<<
 		NS_LOG_INFO (global_count_data);
             }
-            NS_LOG_INFO ("Requester node "<<currentNode<<" receives requested content "<<
-                         requestedContent <<" from node: "<<header->GetSource()); 
+            //NS_LOG_INFO ("Requester node "<<currentNode<<" receives requested content "<<
+                         //requestedContent <<" from node: "<<header->GetSource()); 
         }
 	//This next else if is important. A node in community2
 	//might inject DATA packet to community 1 so it sets 
@@ -641,9 +641,9 @@ SocialNetwork::HandleData(PktHeader *header)
 			 
 		if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
 		{
-			NS_LOG_INFO("LONGLONG2");
+			//NS_LOG_INFO("LONGLONG2");
 			m_pendingDataResponse->push_back(entry);
-			NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
+			//NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
 		}
 	
 	}
@@ -653,8 +653,8 @@ SocialNetwork::HandleData(PktHeader *header)
                 {
                     if(borderNode[i].IsEqual(currentNode))
                     {
-                        NS_LOG_INFO("I am the border node to relay DATA to original requester community");
-                        NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
+                        //NS_LOG_INFO("I am the border node to relay DATA to original requester community");
+                        //NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
                         //vector<Ipv4Address> borderNode_t;
                         PendingResponseEntry entry(requesterId, requesterId, requestedContent,
                                        interestBroadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, NULL, 0);
@@ -665,7 +665,7 @@ SocialNetwork::HandleData(PktHeader *header)
     }
     else
     {
-        NS_LOG_INFO("Current node is "<<currentNode<<" destination is "<<destinationId);
+        //NS_LOG_INFO("Current node is "<<currentNode<<" destination is "<<destinationId);
         
         //vector<Ipv4Address> borderNode_t;
         PendingResponseEntry entry(requesterId, destinationId, requestedContent,
@@ -673,7 +673,7 @@ SocialNetwork::HandleData(PktHeader *header)
         if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
         {
             m_pendingDataResponse->push_back(entry);
-            NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
+            //NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
         }
     }  
 }
@@ -687,8 +687,8 @@ SocialNetwork::HandleDigest(PktHeader *header)
         uint32_t contentArraySize = header->GetContentArraySize();
         ContentOwnerEntry *contentArray = (ContentOwnerEntry *) (header->GetContentArray());            
 
-        NS_LOG_INFO("Encounter node - content array size: "<<contentArraySize);
-        NS_LOG_INFO("Encounter node - content: ");
+        //NS_LOG_INFO("Encounter node - content array size: "<<contentArraySize);
+        //NS_LOG_INFO("Encounter node - content: ");
         //PrintAllContent(contentArray, contentArraySize);
         //NS_LOG_INFO("This node content before merge: ");
         PrintAllContent(m_contentManager->GetContentArray(), m_contentManager->GetContentArraySize());
@@ -708,11 +708,11 @@ SocialNetwork::HandleHello(PktHeader *header)
     Ipv4Address encounterAddress = header->GetSource();
     uint32_t encounterCommunityId = header->GetCommunityId();
     
-    NS_LOG_INFO(""<<currentAddress<<" is in community "<<m_communityId);
-    NS_LOG_INFO(""<<encounterAddress<<" is in community "<<encounterCommunityId);
+    //NS_LOG_INFO(""<<currentAddress<<" is in community "<<m_communityId);
+    //NS_LOG_INFO(""<<encounterAddress<<" is in community "<<encounterCommunityId);
     if (m_communityId != encounterCommunityId)
     {
-        NS_LOG_INFO("INTER-COMMUNITY MEETING");
+        //NS_LOG_INFO("INTER-COMMUNITY MEETING");
         m_meetForeign = true;
     }
     
@@ -804,22 +804,22 @@ SocialNetwork::DecideWhetherToSendContentNameDigest(PktHeader *header)
     
     if (encounterCommunityId == m_communityId)
     {    
-        NS_LOG_INFO("SAME COMMUNITY");
+        //NS_LOG_INFO("SAME COMMUNITY");
         Ipv4Address higherCentralityNode = m_relationship->GetHigherCentralityNode(currentNode, encounterNode);
         if (higherCentralityNode.IsEqual(encounterNode))
         {
             //Unicast content name digest packet to encounter node
-            NS_LOG_INFO(""<<currentNode<<" sends content name digest to node "<<encounterNode);
+            //NS_LOG_INFO(""<<currentNode<<" sends content name digest to node "<<encounterNode);
             PktHeader *header = CreateDigestPacketHeader(encounterNode);
             SendPacket(*header);
         }
     }
     else
     {
-        NS_LOG_INFO("DIFFERENT COMMUNITY");
+        //NS_LOG_INFO("DIFFERENT COMMUNITY");
         if ( m_last_foreign_encounter_node[encounterCommunityId].IsEqual(Ipv4Address("0.0.0.0")) )
         {
-            NS_LOG_INFO(""<<currentNode<<" sends content name digest to node "<<encounterNode);
+            //NS_LOG_INFO(""<<currentNode<<" sends content name digest to node "<<encounterNode);
             PktHeader *header = CreateDigestPacketHeader(encounterNode);
             SendPacket(*header);
             m_last_foreign_encounter_node[encounterCommunityId] = encounterNode;
@@ -830,7 +830,7 @@ SocialNetwork::DecideWhetherToSendContentNameDigest(PktHeader *header)
                 m_relationship->GetHigherCentralityNode(encounterNode, m_last_foreign_encounter_node[encounterCommunityId]);
             if ( higherCentralityNode.IsEqual(encounterNode) )
             {
-                NS_LOG_INFO(""<<currentNode<<" sends content name digest to node "<<encounterNode);
+                //NS_LOG_INFO(""<<currentNode<<" sends content name digest to node "<<encounterNode);
                 PktHeader *header = CreateDigestPacketHeader(encounterNode);
                 SendPacket(*header);
                 m_last_foreign_encounter_node[encounterCommunityId] = encounterNode;
@@ -871,9 +871,9 @@ SocialNetwork::HandlePendingContentDestNodeResponse(PktHeader *header)
             //in the same community.
     */
     
-    NS_LOG_INFO("");
-    NS_LOG_INFO("Inside HandlePendingContentDestNodeResponse");
-    NS_LOG_INFO("m_pending_content_dest_node_response size: "<<m_pending_content_dest_node_response->size());
+    //NS_LOG_INFO("");
+    //NS_LOG_INFO("Inside HandlePendingContentDestNodeResponse");
+    //NS_LOG_INFO("m_pending_content_dest_node_response size: "<<m_pending_content_dest_node_response->size());
     
     for (vector<PendingResponseEntry>::iterator it = m_pending_content_dest_node_response->begin();
          it != m_pending_content_dest_node_response->end(); ++it)
@@ -888,12 +888,12 @@ SocialNetwork::HandlePendingContentDestNodeResponse(PktHeader *header)
 			        it->borderNode, it->borderNodeSize);
             SendPacket(*header);
             
-			NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
-            NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+			//NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
+            //NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
             if ( !((it->foreignDestinationId).IsEqual(Ipv4Address("0.0.0.0"))) )
             {
-                NS_LOG_INFO("The destination is the border node: "<<it->destinationId);
-                NS_LOG_INFO("The foreign content provider is: "<<it->foreignDestinationId);
+                //NS_LOG_INFO("The destination is the border node: "<<it->destinationId);
+                //NS_LOG_INFO("The foreign content provider is: "<<it->foreignDestinationId);
             }
             else
             {
@@ -920,10 +920,10 @@ SocialNetwork::HandlePendingContentDestNodeResponse(PktHeader *header)
                                     it->borderNode, it->borderNodeSize);
                         SendPacket(*header);
 
-						NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
+						//NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
                 
-                        NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
-                        NS_LOG_INFO("The target destination is: "<<it->destinationId);
+                        //NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+                        //NS_LOG_INFO("The target destination is: "<<it->destinationId);
                     }
                     else
                     {
@@ -940,10 +940,10 @@ SocialNetwork::HandlePendingContentDestNodeResponse(PktHeader *header)
                                     it->requesterCommunityId, it->foreignDestinationId,
 				    it->borderNode, it->borderNodeSize);
                             SendPacket(*header);
-                    		NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
+                    		//NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
 
-                            NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
-                            NS_LOG_INFO("The target content provider is: "<<it->destinationId);
+                            //NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+                            //NS_LOG_INFO("The target content provider is: "<<it->destinationId);
                         }
                     }
                 }
@@ -966,7 +966,7 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
         {
             if (encounterCommunityId == m_communityId) //same community
             {
-                NS_LOG_INFO("YOULU2");
+                //NS_LOG_INFO("YOULU2");
                 PktHeader *header = CreateInterestPacketHeader(it->requesterId, encounterNode,
                                                         Ipv4Address("0.0.0.0"), it->contentRequested,
                                                         it->broadcastId, it->requesterCommunityId, Ipv4Address("0.0.0.0"),
@@ -1003,9 +1003,9 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
           at the border node level.
     */
     
-    NS_LOG_INFO("");
-    NS_LOG_INFO("Inside HandlePendingInterestResponse");
-    NS_LOG_INFO("m_pending_interest_response size: "<<m_pending_interest_response->size());
+    //NS_LOG_INFO("");
+    //NS_LOG_INFO("Inside HandlePendingInterestResponse");
+    //NS_LOG_INFO("m_pending_interest_response size: "<<m_pending_interest_response->size());
     for (vector<PendingResponseEntry>::iterator it = m_pending_interest_response->begin();
          it != m_pending_interest_response->end(); ++it)
     {
@@ -1024,8 +1024,8 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
                                                     it->broadcastId, it->requesterCommunityId, it->foreignDestinationId,
                                                     it->borderNode, it->borderNodeSize);
                     SendPacket(*header);
-					NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
-                    NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+					//NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
+                    //NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
                 }
                 else
                 {
@@ -1042,8 +1042,8 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
                                                         it->broadcastId, it->requesterCommunityId, it->foreignDestinationId,
                                                         it->borderNode, it->borderNodeSize);
                         SendPacket(*header);
-						NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
-                        NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+						//NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
+                        //NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
                     }
                 }
             }
@@ -1060,8 +1060,8 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
                                                 it->broadcastId, it->requesterCommunityId, it->foreignDestinationId,
                                                 it->borderNode, it->borderNodeSize);
                 SendPacket(*header);
-				NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
-                NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+				//NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
+                //NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
             }
             else
             {
@@ -1077,8 +1077,8 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
                                                     it->broadcastId, it->requesterCommunityId, it->foreignDestinationId,
                                                     it->borderNode, it->borderNodeSize);
                     SendPacket(*header);
-					NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
-                    NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+					//NS_LOG_INFO(currentNode<<"PHUYEN: "<<Simulator::Now().GetSeconds());
+                    //NS_LOG_INFO("Send INTEREST packet with content ("<<it->contentRequested<<") to "<<encounterNode);
                 }
             }
         }
@@ -1121,9 +1121,9 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
                             Update last_relay_encounter[response->requesterCommunityId] to encounter
     */
     
-    NS_LOG_INFO("");
-    NS_LOG_INFO("Inside HandlePendingDataResponse");
-    NS_LOG_INFO("m_pendingDataResponse size: "<<m_pendingDataResponse->size());
+    //NS_LOG_INFO("");
+    //NS_LOG_INFO("Inside HandlePendingDataResponse");
+    //NS_LOG_INFO("m_pendingDataResponse size: "<<m_pendingDataResponse->size());
     //vector<uint32_t> remove_index; //keep track of element index that needs to remove from m_pendingDataResponse
         //The index corresponds to pending DATA packet that has been sent out.
         
@@ -1140,25 +1140,25 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
                                         it->contentRequested, it->requesterCommunityId,
                                         Ipv4Address("0.0.0.0"), it->borderNode, it->borderNodeSize, it->broadcastId);
             SendPacket(*header);
-            NS_LOG_INFO("Encounter node is the original requester node.");
-            NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+            //NS_LOG_INFO("Encounter node is the original requester node.");
+            //NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
         }
         else if ( (it->destinationId).IsEqual(encounterNode) )
         {
             //Send DATA packet
-            NS_LOG_INFO("Meet destination directly.");
+            //NS_LOG_INFO("Meet destination directly.");
             PktHeader *header = CreateDataPacketHeader(encounterNode, it->requesterId,
                                         it->contentRequested, it->requesterCommunityId,
                                         it->foreignDestinationId, it->borderNode, it->borderNodeSize,
                                         it->broadcastId);
             SendPacket(*header);
-            NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+            //NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
         }
         else //encounter node is not the requester or destination node, use social tie routing to propagate DATA packet
         {
             if (encounterCommunityId == m_communityId) //same community
             {   
-                NS_LOG_INFO("Encounter and I are in same community");
+                //NS_LOG_INFO("Encounter and I are in same community");
                 Ipv4Address higherSocialTieNode=
                         m_relationship->GetHigherSocialTie(currentNodeAddress, encounterNode, it->destinationId);
                 if (higherSocialTieNode.IsEqual(encounterNode))
@@ -1172,7 +1172,7 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
                                 it->foreignDestinationId, it->borderNode, it->borderNodeSize,
 		  	        it->broadcastId);
                         SendPacket(*header);
-                        NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+                        //NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
                     }
                     else
                     {
@@ -1186,7 +1186,7 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
                                         it->contentRequested, it->requesterCommunityId, it->foreignDestinationId,
                                         it->borderNode, it->borderNodeSize, it->broadcastId);
                             SendPacket(*header);
-                            NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+                            //NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
                         }
                     }
                 }
@@ -1195,12 +1195,12 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
             {
                 if ( it->requesterCommunityId == encounterCommunityId ) //if the original requester and the encounter are in same community
                 {
-                    NS_LOG_INFO("Requester and encounter are in same community");
+                    //NS_LOG_INFO("Requester and encounter are in same community");
 					if (currentNodeAddress.IsEqual(Ipv4Address("1.0.0.45")))
 					{
-						NS_LOG_INFO("HERE");
+						//NS_LOG_INFO("HERE");
 					}
-					NS_LOG_INFO("VINCE");
+					//NS_LOG_INFO("VINCE");
                     if ( (it->lastRelayNode[it->requesterCommunityId]).IsEqual(Ipv4Address("0.0.0.0")) ) //test if lastRelayNode is NULL
                     {
                         it->lastRelayNode[it->requesterCommunityId] = encounterNode;
@@ -1210,12 +1210,12 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
                                     Ipv4Address("0.0.0.0"), it->borderNode, it->borderNodeSize, it->broadcastId);
                                                          //Since we already cross the border, the last parameter will be 0.0.0.0
                         SendPacket(*header);
-                        NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
-						NS_LOG_INFO("VINCE1");
+                        //NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+						//NS_LOG_INFO("VINCE1");
 
 						if (currentNodeAddress.IsEqual(Ipv4Address("1.0.0.45")))
 						{
-							NS_LOG_INFO("HERE1");
+							//NS_LOG_INFO("HERE1");
 						}
 
                     }
@@ -1231,11 +1231,11 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
                                         it->contentRequested, it->requesterCommunityId,
                                         it->foreignDestinationId, it->borderNode, it->borderNodeSize, it->broadcastId);
                             SendPacket(*header);
-                            NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
-							NS_LOG_INFO("VINCE2");
+                            //NS_LOG_INFO("Send DATA packet with content ("<<it->contentRequested<<") to "<<encounterNode);
+							//NS_LOG_INFO("VINCE2");
 							if (currentNodeAddress.IsEqual(Ipv4Address("1.0.0.45")))
 							{
-								NS_LOG_INFO("HERE");
+								//NS_LOG_INFO("HERE");
 							}
 
                         }
