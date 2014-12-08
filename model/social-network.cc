@@ -156,12 +156,12 @@ SocialNetwork::StartApplication (void)
     //community 1: 1.x.x.x
     //community 2: 2.x.x.x
     //We use the upper 8 bits for community id.
-    uint32_t checkComm = thisNodeAddress.Get() & 0xFF;
-    NS_LOG_INFO ("Check Comm " << checkComm);
-    if (int(checkComm) < 50)
-    	m_communityId = 0;
-    else
-	m_communityId = 1;
+    //uint32_t checkComm = thisNodeAddress.Get() & 0xFF;
+    //NS_LOG_INFO ("Check Comm " << checkComm);
+    //if (int(checkComm) < 50)
+    //	m_communityId = 0;
+    //else
+//	m_communityId = 1;
     //NS_LOG_INFO(""<<thisNodeAddress<<" community ID: "<<m_communityId);
     
     //cannot obtain Ipv4Address in the constructor before application starts.
