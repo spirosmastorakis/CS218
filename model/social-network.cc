@@ -910,7 +910,8 @@ SocialNetwork::HandlePendingContentDestNodeResponse(PktHeader *header)
             if (encounterCommunityId == m_communityId) //same community
             {
                 Ipv4Address higherSocialTieNode =
-                        m_relationship->GetHigherSocialTie(currentNode, encounterNode, it->destinationId);
+                        m_relationship->GetHigherCentralityNode(currentNode,encounterNode);
+                        //m_relationship->GetHigherSocialTie(currentNode, encounterNode, it->destinationId);
                 if (higherSocialTieNode.IsEqual(encounterNode))
                 {
                     if ( (it->lastRelayNode[m_communityId]).IsEqual(Ipv4Address("0.0.0.0")) ) //test if lastRelayNode is NULL
@@ -933,7 +934,8 @@ SocialNetwork::HandlePendingContentDestNodeResponse(PktHeader *header)
                     else
                     {
                         Ipv4Address higherSocialTieNode2 =
-                                m_relationship->GetHigherSocialTie(it->lastRelayNode[m_communityId], encounterNode, it->destinationId);
+                                m_relationship->GetHigherCentralityNode(it->lastRelayNode[m_communityId],encounterNode);
+                                //m_relationship->GetHigherSocialTie(it->lastRelayNode[m_communityId], encounterNode, it->destinationId);
                         if ( higherSocialTieNode2.IsEqual(encounterNode) )
                         {
                             it->lastRelayNode[m_communityId] = encounterNode;
@@ -1016,7 +1018,9 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
     {
         if (encounterCommunityId == m_communityId) //same community
         {
-            Ipv4Address higherSocialLevelNode = m_relationship->GetHigherSocialLevel(currentNode, encounterNode);
+            Ipv4Address higherSocialLevelNode = 
+                m_relationship->GetHigherCentralityNode(currentNode,encounterNode);
+                //m_relationship->GetHigherSocialLevel(currentNode, encounterNode);
             if ( higherSocialLevelNode.IsEqual(encounterNode) )
             {
                 if ( (it->lastRelayNode[m_communityId]).IsEqual(Ipv4Address("0.0.0.0")) ) //test if lastRelayNode is NULL
@@ -1035,7 +1039,8 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
                 else
                 {
                     Ipv4Address higherSocialLevelNode2 =
-                            m_relationship->GetHigherSocialLevel(it->lastRelayNode[m_communityId], encounterNode);
+                            m_relationship->GetHigherCentralityNode(it->lastRelayNode[m_communityId],encounterNode);
+                            //m_relationship->GetHigherSocialLevel(it->lastRelayNode[m_communityId], encounterNode);
                     if ( higherSocialLevelNode2.IsEqual(encounterNode) )
                     {
                         it->lastRelayNode[m_communityId] = encounterNode;
@@ -1071,7 +1076,8 @@ SocialNetwork::HandlePendingInterestResponse(PktHeader *header)
             else
             {
                 Ipv4Address higherSocialLevelNode =
-                            m_relationship->GetHigherSocialLevel(it->lastRelayNode[encounterCommunityId], encounterNode);
+                            m_relationship->GetHigherCentralityNode(it->lastRelayNode[encounterCommunityId],encounterNode);
+                            //m_relationship->GetHigherSocialLevel(it->lastRelayNode[encounterCommunityId], encounterNode);
                 if ( higherSocialLevelNode.IsEqual(encounterNode) )
                 {
                     it->lastRelayNode[encounterCommunityId] = encounterNode;
@@ -1165,7 +1171,8 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
             {   
                 //NS_LOG_INFO("Encounter and I are in same community");
                 Ipv4Address higherSocialTieNode=
-                        m_relationship->GetHigherSocialTie(currentNodeAddress, encounterNode, it->destinationId);
+                        m_relationship->GetHigherCentralityNode(currentNodeAddress,encounterNode);
+                        //m_relationship->GetHigherSocialTie(currentNodeAddress, encounterNode, it->destinationId);
                 if (higherSocialTieNode.IsEqual(encounterNode))
                 {
                     if ( (it->lastRelayNode[m_communityId]).IsEqual(Ipv4Address("0.0.0.0")) ) //test if lastRelayNode is NULL
@@ -1182,7 +1189,8 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
                     else
                     {
                         Ipv4Address higherSocialTieNode2 =
-                            m_relationship->GetHigherSocialTie(it->lastRelayNode[m_communityId], encounterNode, it->destinationId);
+                            m_relationship->GetHigherCentralityNode(it->lastRelayNode[m_communityId],encounterNode);
+                            //m_relationship->GetHigherSocialTie(it->lastRelayNode[m_communityId], encounterNode, it->destinationId);
                         if ( higherSocialTieNode2.IsEqual(encounterNode) )
                         {
                             it->lastRelayNode[m_communityId] = encounterNode;
@@ -1227,7 +1235,8 @@ SocialNetwork::HandlePendingDataResponse(PktHeader *header)
                     else
                     {
                         Ipv4Address higherSocialTieNode2 =
-                            m_relationship->GetHigherSocialTie(it->lastRelayNode[it->requesterCommunityId], encounterNode, it->destinationId);
+                            m_relationship->GetHigherCentralityNode(it->lastRelayNode[it->requesterCommunityId],encounterNode);
+                            //m_relationship->GetHigherSocialTie(it->lastRelayNode[it->requesterCommunityId], encounterNode, it->destinationId);
                         if ( higherSocialTieNode2.IsEqual(encounterNode) )
                         {
                             it->lastRelayNode[it->requesterCommunityId] = encounterNode;
