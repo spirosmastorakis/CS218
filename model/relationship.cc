@@ -402,7 +402,7 @@ CentralityTableEntry *Relationship::GetHigherCentralityNodes (uint32_t &size)
 void Relationship::ComputeCentrality ()
 {    
     centralityTableSize = 0; // Start table over every time centrality is computed
-    //Commented by Haitao double alpha = 0.5; // 
+    //double alpha = 0.5; // 
     uint32_t index;
     CentralityTableEntry c;
  
@@ -422,7 +422,7 @@ void Relationship::ComputeCentrality ()
         if (index == centralityTableSize)
         {
             // Count the unique occurences of peer encounters w/in community
-            //Commented by Haitao uint32_t nodeCount = UniqueNodeCount (socialTable[i].peer1.commID);
+            //uint32_t nodeCount = UniqueNodeCount (socialTable[i].peer1.commID);
             double RkSum = 0; // social tie sum
             double RkSquSum = 0; // social tie sqared sum
 			//uint16_t n = 0; // Number of nodes observed
@@ -445,17 +445,17 @@ void Relationship::ComputeCentrality ()
                 //double equPt1;
                 //double equPt2;
 		// First part of the equation
-		//equPt1 = alpha * (RkSum)/n;
-		//Commented by Haitao equPt1 = alpha * (RkSum)/nodeCount;
+		// equPt1 = alpha * (RkSum)/n;
+		//equPt1 = alpha * (RkSum)/nodeCount;
 
 		// Second part of the equation
 		//equPt2 = (1 - alpha) * pow(RkSum,2) / (n * RkSquSum);
-		//Commented by Haitao equPt2 = (1 - alpha) * pow(RkSum,2) / (nodeCount * RkSquSum);
+		//equPt2 = (1 - alpha) * pow(RkSum,2) / (nodeCount * RkSquSum);
 				
 		// Insert Node ID into centrality entry
 		c.node = socialTable[i].peer1;
 		// Compute centrality for entry
-		//Commented by Haitao c.centrality = equPt1 + equPt2;
+		//c.centrality = equPt1 + equPt2;
                 c.centrality = pow(RkSum, 3)/RkSquSum;
 				
 		centralityTable[index] = c; // Insert centrality entry
@@ -607,13 +607,13 @@ Ipv4Address Relationship::GetHigherSocialTie (Ipv4Address peer1, Ipv4Address pee
     {
         return dummyAddress;
     }
-    else if (peer1SocialTie > peer2SocialTie)
+    else if (peer2SocialTie > 1 * peer1SocialTie)
     {
-        return peer1;
+        return peer2;
     }
     else
     {
-        return peer2;
+        return peer1;
     }
 
 }
@@ -649,13 +649,13 @@ Ipv4Address Relationship::GetHigherSocialLevel (Ipv4Address peer1, Ipv4Address p
     {
         return dummyAddress;
     }
-    else if (peer1SocialLevel > peer2SocialLevel)
+    else if (peer2SocialLevel > 1 * peer1SocialLevel)
     {
-        return peer1;
+        return peer2;
     }
     else
     {
-        return peer2;
+        return peer1;
     }
 }
 
@@ -805,13 +805,13 @@ Ipv4Address Relationship::GetHigherCentralityNode (Ipv4Address peer1, Ipv4Addres
     {
         return dummyAddress;
     }
-    else if (peer1Centrality > peer2Centrality)
+    else if (peer2Centrality > 1 * peer1Centrality)
     {
-        return peer1;
+        return peer2;
     }
     else
     {
-        return peer2;
+        return peer1;
     }
 
 }
