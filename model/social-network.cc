@@ -1659,8 +1659,9 @@ SocialNetwork::HandleInterest(PktHeader *header)
 			
                         //Ipv4Address bestBorderNode = m_relationship->GetBestBorderNode(foreignCommunityIds[i]);
                         //NS_LOG_INFO("SAIGON "<<bestBorderNode);
-			std::vector<Ipv4Address> set = fringeNodeSet.find(foreignCommunityIds[i])->second;
-			if (set != fringeNodeSet.end()->second) {
+                	std::map<uint32_t, std::vector<Ipv4Address>>::iterator Nodeset_itr = fringeNodeSet.find(foreignCommunityIds[i]);
+			if (Nodeset_itr != fringeNodeSet.end()) {
+			    std::vector<Ipv4Address> set = Nodeset_itr->second;
 			    Ipv4Address *temp = new Ipv4Address[set.size()];
 			    int i = 0;
 			    for(Ipv4Address itr : set) {
