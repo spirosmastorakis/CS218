@@ -203,7 +203,7 @@ SocialNetwork::StartApplication (void)
     
     NS_LOG_INFO ("Application starts at: " << Simulator::Now ().GetSeconds ());
     
-    ScheduleTransmitHelloPackets(1000);
+    ScheduleTransmitHelloPackets(10000);
 }
 
 /*
@@ -696,8 +696,9 @@ SocialNetwork::HandleDigest(PktHeader *header)
         //NS_LOG_INFO("Encounter node - content: ");
         //PrintAllContent(contentArray, contentArraySize);
         //NS_LOG_INFO("This node content before merge: ");
-        PrintAllContent(m_contentManager->GetContentArray(), m_contentManager->GetContentArraySize());
-        
+        /*Qiuhan comment
+	PrintAllContent(m_contentManager->GetContentArray(), m_contentManager->GetContentArraySize());
+        */
         m_contentManager->Merge(contentArray, contentArraySize);
                     
         //NS_LOG_INFO("This node content after merge: ");
@@ -1398,10 +1399,10 @@ SocialNetwork::HandleInterest(PktHeader *header)
         m_interestManager->Insert(interestEntry);
     }*/
     Ipv4Address contentOwner = m_contentManager->GetOwnerOfContent(requestedContent);
-    NS_LOG_INFO("Owner of content "<< requestedContent <<" is: "<<contentOwner);
+    //NS_LOG_INFO("Owner of content "<< requestedContent <<" is: "<<contentOwner);
     if (contentOwner.IsEqual(currentNodeAddress)) //I have the content
     {
-        NS_LOG_INFO("LAUREN");
+        //NS_LOG_INFO("LAUREN");
         if (encounterNode.IsEqual(requesterId)) {
         //encounter is the requester => no need to
         //social tie or anything. Just send DATA directly
@@ -1519,7 +1520,9 @@ SocialNetwork::HandleInterest(PktHeader *header)
             // node. Here's the border node receives and social-tie the INTEREST packet to
             // content provider in community 2.
 		//vector<Ipv4Address>borderNode_t;
-                NS_LOG_INFO("Foreign node has the content. Save pending INTEREST packet to route to foreign content provider.");
+                /* Qiuhan
+		NS_LOG_INFO("Foreign node has the content. Save pending INTEREST packet to route to foreign content provider.");
+		*/
                 PendingResponseEntry entry(requesterId, foreignDestinationId,
                                 requestedContent, broadcastId, Ipv4Address("0.0.0.0"), requesterCommunityId, NULL, 0);
 		ProcessPendingContent(entry, interestEntry);
@@ -1529,7 +1532,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
              //destination. I need to relay this Interest packet => 2 cases: I know who is the
              //content provider or I do not know.
             {
-                NS_LOG_INFO("XIAO");
+                //NS_LOG_INFO("XIAO");
             // Qiuhan: What is the function of borderNodeId equal to 0.0.0.0
                 //if (borderNodeId.IsEqual(Ipv4Address("0.0.0.0")) &&
 		if (borderNode == NULL &&
@@ -1544,7 +1547,7 @@ SocialNetwork::HandleInterest(PktHeader *header)
                     if ( !(contentProviderId.IsEqual(Ipv4Address("0.0.0.0"))) &&
                         foreignDestinationId.IsEqual(Ipv4Address("0.0.0.0")) )
                     {
-                        NS_LOG_INFO("XIAO2");
+                        //NS_LOG_INFO("XIAO2");
                         if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
                         {
                 	    //vector<Ipv4Address>borderNode_t;
@@ -1685,7 +1688,9 @@ SocialNetwork::HandleInterest(PktHeader *header)
                                     if (!CheckIfPendingResponseExist(m_pending_interest_response,entry))
                                     {
                                         m_pending_interest_response->push_back(entry);
-                                        NS_LOG_INFO("Save pending INTEREST response entry to m_pending_interest_response");
+                                        /*Qiuhan
+					NS_LOG_INFO("Save pending INTEREST response entry to m_pending_interest_response");
+					*/
                                 /*if (! (m_interestManager->Exist(interestEntry)) )
                                 {
                                     m_interestManager->Insert(interestEntry);
@@ -1749,7 +1754,9 @@ SocialNetwork::ProcessPendingDataResponse(PendingResponseEntry &entry,
     if (!CheckIfPendingResponseExist(m_pendingDataResponse,entry))
     {
         m_pendingDataResponse->push_back(entry);
-        NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
+        /*Qiuhan
+	NS_LOG_INFO("Save pending DATA response entry to m_pendingDataResponse");
+	*/
         if (! (m_interestManager->Exist(interestEntry)) )
         {
             m_interestManager->Insert(interestEntry);
@@ -1766,7 +1773,9 @@ SocialNetwork::ProcessPendingInterest(PendingResponseEntry &entry,
     {
         //I am not relay to border node or content provider
         m_pending_interest_response->push_back(entry);
+	/* Qiuhan
         NS_LOG_INFO("Save pending INTEREST response entry to m_pending_interest_response");
+	*/
         if (! (m_interestManager->Exist(interestEntry)) )
         {
             m_interestManager->Insert(interestEntry);
